@@ -1,0 +1,9 @@
+.wordmark {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.pivot {
+  color: var(--accent);
+}

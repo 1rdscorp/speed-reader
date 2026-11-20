@@ -1,0 +1,77 @@
+.reader {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: 2.75rem 1fr 2.75rem;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--page-gutter);
+}
+
+.title {
+  grid-column: 2;
+  overflow: hidden;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+ * Focus mode: once the words are flowing, everything that is not the word
+ * recedes. It returns the moment you pause, hover or tab into a control.
+ */
+.chrome {
+  transition: opacity 150ms var(--ease);
+}
+
+.reader[data-status='playing'] .chrome {
+  opacity: 0.3;
+  transition: opacity 600ms var(--ease) 1s;
+}
+
+.reader[data-status='playing'] .chrome:focus-within {
+  opacity: 1;
+  transition: opacity 150ms var(--ease);
+}
+
+@media (hover: hover) {
+  .reader[data-status='playing'] .chrome:hover {
+    opacity: 1;
+    transition: opacity 150ms var(--ease);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chrome,
+  .reader[data-status='playing'] .chrome {
+    transition: none;
+  }
+}
+
+/* Full-screen notice when there is no text to show. */
+.notice {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-4);
+  padding: var(--page-gutter);
+  text-align: center;
+}
+
+.notice h1 {
+  font-size: var(--text-xl);
+  line-height: 1.2;
+}
+
+.notice p {
+  max-width: 28rem;
+  color: var(--ink-muted);
+}

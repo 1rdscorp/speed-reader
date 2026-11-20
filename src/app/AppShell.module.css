@@ -1,0 +1,55 @@
+.shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  width: min(100%, calc(var(--page-width) + 2 * var(--page-gutter)));
+  margin-inline: auto;
+  padding: var(--space-3) var(--page-gutter);
+}
+
+.home {
+  margin-right: auto;
+  text-decoration: none;
+}
+
+.nav {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.navLink {
+  color: var(--ink-muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.navLink:hover,
+.navLink[aria-current='page'] {
+  color: var(--ink);
+}
+
+/* Shared by the shell's own pages: not-found and error. */
+.message {
+  width: min(100%, calc(var(--page-width) + 2 * var(--page-gutter)));
+  margin-inline: auto;
+  padding: var(--space-8) var(--page-gutter);
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  align-content: start;
+}
+
+.message h1 {
+  font-size: var(--text-xl);
+  line-height: 1.2;
+}
+
+.message p {
+  color: var(--ink-muted);
+}

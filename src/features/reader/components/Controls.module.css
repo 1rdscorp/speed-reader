@@ -1,0 +1,146 @@
+.controls {
+  width: min(100%, calc(var(--page-width) + 2 * var(--page-gutter)));
+  margin-inline: auto;
+  padding: 0 var(--page-gutter) max(var(--space-5), env(safe-area-inset-bottom));
+  display: grid;
+  gap: var(--space-3);
+  container-type: inline-size;
+}
+
+/* Position in the text. The filled part of the track is drawn with a gradient driven by --fill. */
+.scrubber {
+  --track: linear-gradient(to right, var(--ink) var(--fill, 0%), var(--hairline) var(--fill, 0%));
+  display: block;
+  width: 100%;
+  height: 1.5rem;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+
+.scrubber::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--track);
+}
+
+.scrubber::-moz-range-track {
+  height: 2px;
+  background: var(--track);
+}
+
+.scrubber::-webkit-slider-thumb {
+  width: 12px;
+  height: 12px;
+  margin-top: -5px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  appearance: none;
+}
+
+.scrubber::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-areas: 'status transport speed';
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.status {
+  grid-area: status;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.clock {
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+
+.transport {
+  grid-area: transport;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.play {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  transition: background-color 120ms var(--ease);
+}
+
+@media (hover: hover) {
+  .play:hover {
+    background: color-mix(in oklab, var(--ink) 84%, var(--paper));
+  }
+}
+
+.speed {
+  grid-area: speed;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+}
+
+.speedValue {
+  min-width: 5.5rem;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.speedNumber {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.keys {
+  color: var(--ink-muted);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+
+.keys kbd {
+  font-family: var(--font-mono);
+  font-size: inherit;
+  color: var(--ink);
+}
+
+/* Keyboard hints are noise on a device without a keyboard. */
+@media (hover: none) {
+  .keys {
+    display: none;
+  }
+}
+
+@container (max-width: 30rem) {
+  .bar {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'transport transport'
+      'status speed';
+  }
+
+  .transport {
+    justify-self: center;
+  }
+}
