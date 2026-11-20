@@ -78,6 +78,15 @@ Getting text in:
   It runs in the browser; no AI service is involved.
 - Paste a link to an article, where the site is deployed with the page endpoint.
 
+Stereograms:
+
+- Fifty built-in stereograms, each hiding a word. They are drawn in the browser
+  from a seed (`src/lib/stereograms`), so no image files are shipped.
+- Each is shown against a 30-second timer that can be paused; when the time is
+  up, "Show image" reveals the hidden word.
+- Add stereogram pictures of your own, with an optional answer. They follow the
+  built-in ones and are saved in the browser.
+
 Keeping it:
 
 - Everything is saved in the browser, in IndexedDB, with room for whole books.
@@ -124,6 +133,8 @@ src/
                  each loaded only when first needed.
     practice/    Practice texts: a bank of short passages and the generator
                  that assembles them by topic and length.
+    stereograms/ The random-dot stereogram generator, the hidden words, and
+                 storage for pictures the person adds.
   ui/          Shared presentational components: buttons, icons, logo, and the
                word stage with its focus marks.
   features/    One folder per feature, each a self-contained slice.
@@ -133,6 +144,7 @@ src/
     settings/    Reading settings, with a preview of their effect.
     games/       Typing games. Each is a self-contained page in public/games/,
                  shown in a frame; add one by listing it in games.ts.
+    stereograms/ Hidden-word pictures against a timer, and adding your own.
   app/         Composition: feature registry, routes, shell, service wiring.
   styles/      Design tokens and base styles.
   test/        Test setup and a helper that renders the whole app in memory.
@@ -152,7 +164,7 @@ The seams that let later stages slot in:
   navigation entry. Routes and the header navigation are assembled from the
   list, so a new stage's page appears in the menu by being added to it.
 - **Services** — `src/lib/services.ts` defines what the app depends on
-  (documents, settings, importer). Components get them from `useServices()`;
+  (documents, settings, importer, stereograms). Components get them from `useServices()`;
   `src/app/createServices.ts` is the single place that picks implementations.
 - **Storage** — everything persists through the small async `KeyValueStore`
   interface. The library uses IndexedDB and settings use localStorage, each
@@ -197,7 +209,8 @@ The plan follows the tool cards on the front page.
 4. **Speed test and progress** — measure WPM with a short quiz and keep a
    history.
 
-Also built, outside that list: the library and file import. Link import works
+Also built, outside that list: the library, file import, typing games and
+stereograms. Link import works
 locally but is off on the published site, because GitHub Pages cannot run the
 page endpoint (see [Importing from a link](#importing-from-a-link)).
 

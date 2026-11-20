@@ -7,6 +7,7 @@ import { createDocumentRepository } from '@/lib/documents';
 import { createTextImporter, type TextImporterOptions } from '@/lib/import';
 import type { Services } from '@/lib/services';
 import { SettingsStore } from '@/lib/settings';
+import { createStereogramRepository } from '@/lib/stereograms';
 import { createMemoryStore } from '@/lib/storage';
 
 /** Services backed by memory, for tests. Pass importer options to switch link import on. */
@@ -19,6 +20,7 @@ export function createTestServices(importerOptions?: TextImporterOptions): Servi
     documents: createDocumentRepository(store, clock),
     settings: new SettingsStore(store),
     importer: createTextImporter(importerOptions),
+    stereograms: createStereogramRepository(store),
   };
 }
 

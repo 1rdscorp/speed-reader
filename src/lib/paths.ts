@@ -8,5 +8,6 @@ export const paths = {
   read: (documentId?: string) => (documentId ? `/read/${documentId}` : '/read'),
   library: () => '/library',
   games: (gameId?: string) => (gameId ? `/games/${gameId}` : '/games'),
+  stereograms: () => '/stereograms',
   settings: () => '/settings',
 };

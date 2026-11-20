@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTestServices, renderApp } from '@/test/renderApp';
 
 async function seeded(...texts: Array<{ text: string; title?: string }>) {
@@ -65,6 +65,7 @@ describe('home page', () => {
       'Read',
       'Library',
       'Games',
+      'Stereograms',
       'Settings',
     ]);
   });
@@ -574,5 +575,90 @@ describe('dead ends', () => {
   it('explains when an address is wrong', async () => {
     renderApp('/no/such/page');
     expect(await screen.findByRole('heading', { name: /nothing at this address/ })).toBeTruthy();
+  });
+});
+
+describe('stereograms', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+  const tick = (seconds: number) => act(() => void vi.advanceTimersByTime(seconds * 1000));
+  const timeLeft = () => screen.getByRole('timer').textContent;
+
+  it('shows fifty pictures, each against a 30-second timer that can be paused', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    const { user } = renderApp('/stereograms');
+    expect(await screen.findByText('Stereogram 1 of 50')).toBeTruthy();
+    expect(timeLeft()).toBe('0:30');
+
+    tick(4);
+    expect(timeLeft()).toBe('0:26');
+    await user.click(screen.getByRole('button', { name: 'Pause' }));
+    tick(10);
+    expect(timeLeft()).toBe('0:26');
+    await user.click(screen.getByRole('button', { name: 'Resume' }));
+    tick(1);
+    expect(timeLeft()).toBe('0:25');
+
+    // The next picture starts its own 30 seconds; going back from the first reaches the last.
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.getByText('Stereogram 2 of 50')).toBeTruthy();
+    expect(timeLeft()).toBe('0:30');
+    await user.click(screen.getByRole('button', { name: 'Previous' }));
+    await user.click(screen.getByRole('button', { name: 'Previous' }));
+    expect(screen.getByText('Stereogram 50 of 50')).toBeTruthy();
+  });
+
+  it('offers to show the hidden word only when the time is up', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    const { user } = renderApp('/stereograms');
+    await screen.findByText('Stereogram 1 of 50');
+    expect(screen.queryByRole('button', { name: 'Show image' })).toBeNull();
+
+    tick(30);
+    expect(timeLeft()).toBe('0:00');
+    await user.click(screen.getByRole('button', { name: 'Show image' }));
+    expect(screen.getByText('The hidden word is READ.')).toBeTruthy();
+    expect(screen.getByRole('img', { name: 'The hidden word: READ' })).toBeTruthy();
+
+    await user.click(screen.getByRole('button', { name: 'Next' }));
+    expect(screen.queryByText(/hidden word is/)).toBeNull();
+    expect(screen.getByRole('button', { name: 'Pause' })).toBeTruthy();
+  });
+
+  it('adds your own stereogram to the end, shows its answer, and removes it', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    const { user, services } = renderApp('/stereograms');
+    await screen.findByText('Stereogram 1 of 50');
+
+    const picture = new File([new Uint8Array([1, 2, 3])], 'shark.png', { type: 'image/png' });
+    await user.upload(screen.getByLabelText('Picture'), picture);
+    await user.type(screen.getByLabelText(/What is hidden/), 'A shark');
+    await user.click(screen.getByRole('button', { name: 'Add stereogram' }));
+    expect(await screen.findByText('Stereogram 1 of 51')).toBeTruthy();
+    expect(await services.stereograms.list()).toMatchObject([{ name: 'shark.png' }]);
+
+    await user.click(screen.getByRole('button', { name: 'View shark.png' }));
+    expect(screen.getByText('Stereogram 51 of 51 · shark.png')).toBeTruthy();
+    expect(
+      (await screen.findByRole('img', { name: 'Your stereogram: shark.png' })).getAttribute('src'),
+    ).toMatch(/^data:image\/png;base64,/);
+    tick(30);
+    await user.click(screen.getByRole('button', { name: 'Show image' }));
+    expect(screen.getByText('Hidden in it: A shark')).toBeTruthy();
+
+    await user.click(screen.getByRole('button', { name: 'Remove shark.png' }));
+    expect(await screen.findByText('Stereogram 50 of 50')).toBeTruthy();
+    expect(await services.stereograms.list()).toEqual([]);
+  });
+
+  it('refuses a file that is not a picture', async () => {
+    const { user, services } = renderApp('/stereograms');
+    await screen.findByText('Stereogram 1 of 50');
+    const notes = new File(['hello'], 'notes.txt', { type: 'text/plain' });
+    fireEvent.change(screen.getByLabelText('Picture'), { target: { files: [notes] } });
+    await user.click(screen.getByRole('button', { name: 'Add stereogram' }));
+    expect(await screen.findByText('That file is not a picture.')).toBeTruthy();
+    expect(await services.stereograms.list()).toEqual([]);
   });
 });

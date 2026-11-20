@@ -3,6 +3,7 @@ import { homeFeature } from '@/features/home';
 import { libraryFeature } from '@/features/library';
 import { readerFeature } from '@/features/reader';
 import { settingsFeature } from '@/features/settings';
+import { stereogramsFeature } from '@/features/stereograms';
 import type { FeatureModule } from '@/lib/feature';
 
 /**
@@ -14,5 +15,6 @@ export const FEATURES: FeatureModule[] = [
   readerFeature,
   libraryFeature,
   gamesFeature,
+  stereogramsFeature,
   settingsFeature,
 ];

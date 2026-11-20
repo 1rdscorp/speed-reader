@@ -2,6 +2,7 @@ import { createContext, use } from 'react';
 import type { DocumentRepository } from '@/lib/documents';
 import type { TextImporter } from '@/lib/import';
 import type { SettingsStore } from '@/lib/settings';
+import type { StereogramRepository } from '@/lib/stereograms';
 
 /**
  * The app's long-lived collaborators. Components reach them through
@@ -12,6 +13,7 @@ export interface Services {
   documents: DocumentRepository;
   settings: SettingsStore;
   importer: TextImporter;
+  stereograms: StereogramRepository;
 }
 
 export const ServicesContext = createContext<Services | null>(null);

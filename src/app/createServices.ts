@@ -3,6 +3,7 @@ import { createDocumentRepository, moveDocuments } from '@/lib/documents';
 import { createTextImporter } from '@/lib/import';
 import type { Services } from '@/lib/services';
 import { SettingsStore } from '@/lib/settings';
+import { createStereogramRepository } from '@/lib/stereograms';
 import { createBrowserStore, openIndexedDbStore, type KeyValueStore } from '@/lib/storage';
 
 /**
@@ -27,8 +28,10 @@ async function openLibraryStore(small: KeyValueStore): Promise<KeyValueStore> {
 export async function createServices(): Promise<Services> {
   // Settings are tiny and wanted at once, so they stay in localStorage.
   const small = createBrowserStore(STORAGE_NAMESPACE);
+  const library = await openLibraryStore(small);
   return {
-    documents: createDocumentRepository(await openLibraryStore(small)),
+    documents: createDocumentRepository(library),
+    stereograms: createStereogramRepository(library),
     settings: new SettingsStore(small),
     importer: createTextImporter({ pageEndpoint: import.meta.env.VITE_PAGE_ENDPOINT || undefined }),
   };
