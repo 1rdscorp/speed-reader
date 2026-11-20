@@ -148,24 +148,26 @@ describe('adding text', () => {
     await user.click(screen.getByRole('button', { name: 'Generate text' }));
 
     const title = await screen.findByRole('heading', { level: 1, name: / and 1 more$/ });
-    const [saved] = await services.documents.list();
-    expect(saved).toMatchObject({
-      title: title.textContent,
-      source: { kind: 'generated', topic: 'history' },
-    });
-    expect(saved!.wordCount).toBeGreaterThan(100);
-    expect(saved!.wordCount).toBeLessThan(220);
-    // The text opens on the heading of its first passage.
-    expect(saved!.title.startsWith(stageWord() ?? '?')).toBe(true);
-
-    // The generated text is also placed in the text box.
+    const first = title.textContent!.replace(' and 1 more', '');
+    // The text opens on the heading of its first passage, and is also placed in the text box.
+    expect(first.startsWith(stageWord() ?? '?')).toBe(true);
     const box = screen.getByLabelText('Your text') as HTMLTextAreaElement;
-    expect(box.value.startsWith(saved!.title.replace(' and 1 more', ''))).toBe(true);
-    expect(box.value.length).toBeGreaterThan(500);
+    expect(box.value.startsWith(first)).toBe(true);
+    expect(screen.getByText(/Word 1 of 1\d\d/)).toBeTruthy();
 
-    // A second one is a new text, not a replacement.
+    // It is not kept: nothing reaches the library, however many are generated.
     await user.click(screen.getByRole('button', { name: 'Generate text' }));
-    await waitFor(async () => expect(await services.documents.list()).toHaveLength(2));
+    await user.click(screen.getByRole('link', { name: 'Library' }));
+    expect(await screen.findByText('Nothing here yet.')).toBeTruthy();
+    expect(await services.documents.list()).toEqual([]);
+  });
+
+  it('keeps a generated text only if you ask to', async () => {
+    const { user, services } = renderApp('/read');
+    await user.click(await screen.findByRole('button', { name: 'Generate text' }));
+    await screen.findByRole('heading', { level: 1, name: / and 4 more$/ });
+    await user.click(screen.getByRole('button', { name: 'Read this text' }));
+    await waitFor(async () => expect(await services.documents.list()).toHaveLength(1));
   });
 
   it('offers link import only when there is a way to fetch pages', async () => {

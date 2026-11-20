@@ -2,6 +2,7 @@ import { useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'r
 import { Link, useNavigate } from 'react-router';
 import { countWords } from '@/core';
 import { formatCount, formatReadingTime } from '@/lib/format';
+import type { NewDocument } from '@/lib/documents';
 import { paths } from '@/lib/paths';
 import {
   PRACTICE_LENGTHS,
@@ -35,7 +36,7 @@ const SAVE_FAILED =
  * Where new text comes in: pasted, opened from files, generated for practice,
  * or fetched from a link where supported.
  */
-export function AddText() {
+export function AddText({ onGenerated }: { onGenerated: (text: NewDocument) => void }) {
   const { documents } = useServices();
   const { wpm } = useSettings();
   const navigate = useNavigate();
@@ -84,11 +85,10 @@ export function AddText() {
     setError(null);
     try {
       const generated = await generatePracticeText({ topic, length });
-      const created = await documents.create(generated);
       // Show what was generated in the text box as well, where it can be read over or edited.
       setText(generated.text);
-      // Stay where the person is, by the text box; the reading area comes into view when they press play.
-      await navigate(paths.read(created.id), { preventScrollReset: true });
+      // A practice text is for reading now, not for keeping: the reader shows it without saving it.
+      onGenerated(generated);
     } catch {
       setError(SAVE_FAILED);
     }
@@ -160,8 +160,8 @@ export function AddText() {
         <div>
           <h2 className={styles.label}>Nothing to hand? Generate a practice text</h2>
           <p className={styles.hint}>
-            Short reads on the topic you pick, put together in your browser. Each one is saved to
-            your library like any other text.
+            Short reads on the topic you pick, put together in your browser. They are not added to
+            your library; press “Read this text” if you want to keep one.
           </p>
         </div>
         <div className={styles.generateFields}>

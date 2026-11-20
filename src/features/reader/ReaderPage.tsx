@@ -1,5 +1,8 @@
-import { useParams } from 'react-router';
+import { useState } from 'react';
+import { useLocation, useParams } from 'react-router';
+import { countWords } from '@/core';
 import { APP_NAME } from '@/lib/config';
+import type { NewDocument, ReadingDocument } from '@/lib/documents';
 import { useServices } from '@/lib/services';
 import { useAsync } from '@/lib/useAsync';
 import { AddText } from './components/AddText';
@@ -22,9 +25,33 @@ export function ReaderPage() {
     return (latest && (await documents.get(latest.id))) ?? SAMPLE_DOCUMENT;
   }, [documents, documentId]);
 
-  const document = state.status === 'ready' ? state.data : undefined;
+  // A generated practice text is read without being saved. It is held here,
+  // tied to the visit it was made on, so moving to another text lets it go.
+  const visit = useLocation().key;
+  const [practice, setPractice] = useState<{ visit: string; document: ReadingDocument }>();
+  const showPractice = (text: NewDocument, serial = Date.now()) =>
+    setPractice({
+      visit,
+      document: {
+        // Not the id of anything stored, so saving its reading position does nothing.
+        id: `practice-${serial}`,
+        title: text.title ?? 'Practice text',
+        text: text.text,
+        source: text.source,
+        wordCount: countWords(text.text),
+        createdAt: 0,
+        lastReadAt: 0,
+        progress: { offset: 0, fraction: 0 },
+      },
+    });
+
+  const loaded = state.status === 'ready' ? state.data : undefined;
+  const document = practice?.visit === visit ? practice.document : loaded;
   // While another text is loading the previous one stays up; do not show it under the new address.
-  const current = document && (!documentId || document.id === documentId) ? document : undefined;
+  const current =
+    document && (document !== loaded || !documentId || document.id === documentId)
+      ? document
+      : undefined;
   const missing = document === null || (current !== undefined && current.wordCount === 0);
 
   return (
@@ -51,7 +78,7 @@ export function ReaderPage() {
           </div>
         )}
         {current && !missing && <ReaderSession key={current.id} document={current} />}
-        <AddText />
+        <AddText onGenerated={showPractice} />
       </div>
 
       <ControlsPanel />
