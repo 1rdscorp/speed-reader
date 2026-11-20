@@ -13,3 +13,6 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
       removeEventListener: () => {},
     }) as unknown as MediaQueryList;
 }
+
+// jsdom does not scroll; the router asks it to when the page changes.
+if (typeof window !== 'undefined') window.scrollTo = () => {};

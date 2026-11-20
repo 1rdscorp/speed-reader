@@ -15,77 +15,6 @@
   font-size: var(--text-xl);
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-3);
-}
-
-.label {
-  font-weight: 600;
-}
-
-.value {
-  color: var(--accent);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.quietValue {
-  color: var(--ink-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.slider {
-  width: 100%;
-  height: 28px;
-  margin: 0;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
-.ends {
-  display: flex;
-  justify-content: space-between;
-  color: var(--ink-muted);
-  font-size: var(--text-xs);
-}
-
-.select {
-  min-height: 44px;
-  padding: 0 var(--space-3);
-  border: 1.5px solid var(--outline);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  cursor: pointer;
-}
-
-.toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  min-height: 44px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.toggle input {
-  flex: none;
-  width: 22px;
-  height: 22px;
-  margin: 0;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
 .tip {
   color: var(--ink-muted);
   font-size: 0.8125rem;
@@ -108,4 +37,9 @@
   .keys {
     display: none;
   }
+}
+
+.more {
+  font-size: var(--text-sm);
+  font-weight: 600;
 }

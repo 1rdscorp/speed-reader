@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState, useSyncExternalStore, type CSSProperties } from 'react';
-import { Player, buildFrames, buildTimeline, splitFrame, tokenize } from '@/core';
+import { useEffect, useMemo, type CSSProperties } from 'react';
+import { splitFrame, tokenize } from '@/core';
+import { usePlayback } from '@/lib/usePlayback';
 import { WordStage } from '@/ui';
 import styles from './HomePage.module.css';
 
@@ -10,18 +11,13 @@ const LOOP_PAUSE_MS = 1_400;
 
 /** The reader in miniature, playing a sentence on a loop with the real engine. */
 export function LivePreview() {
-  const { frames, timeline } = useMemo(() => {
-    const tokens = tokenize(TEXT);
-    return { frames: buildFrames(tokens), timeline: buildTimeline(tokens) };
-  }, []);
-  const [player] = useState(() => new Player(timeline, { wpm: WPM }));
-  const { index, status } = useSyncExternalStore(player.subscribe, player.getSnapshot);
+  const tokens = useMemo(() => tokenize(TEXT), []);
+  const { player, frames, frame, index, status } = usePlayback(tokens, { wpm: WPM });
 
   useEffect(() => {
     // People who ask for less motion get the first word, held still.
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     player.play();
-    return () => player.pause();
   }, [player]);
 
   useEffect(() => {
@@ -30,7 +26,6 @@ export function LivePreview() {
     return () => clearTimeout(timer);
   }, [player, status]);
 
-  const frame = frames[index];
   const fraction = status === 'finished' ? 1 : index / Math.max(frames.length - 1, 1);
 
   return (

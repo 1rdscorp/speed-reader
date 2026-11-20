@@ -1,35 +1,15 @@
 .card {
-  --card-bg: var(--surface);
-  --card-ink: var(--ink);
-  --card-muted: var(--ink-muted);
-  --stage-line: var(--line);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
   padding: clamp(1.125rem, 4vw, 1.75rem);
-  border: 1px solid var(--stage-line);
-  border-radius: var(--radius-lg);
-  background: var(--card-bg);
-  color: var(--card-ink);
-}
-
-.card[data-dark] {
-  --card-bg: var(--night-bg);
-  --card-ink: var(--night-ink);
-  --card-muted: var(--night-muted);
-  --stage-line: var(--night-line);
-  --focus-letter: var(--night-focus-letter);
-}
-
-.card[data-dark] :focus-visible {
-  outline-color: var(--night-outline);
 }
 
 .meta {
   display: flex;
   justify-content: space-between;
   gap: var(--space-4);
-  color: var(--card-muted);
+  color: var(--ink-muted);
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
 }
@@ -48,7 +28,7 @@
   --track-fill: linear-gradient(
     to right,
     var(--progress) var(--fill, 0%),
-    var(--stage-line) var(--fill, 0%)
+    var(--line) var(--fill, 0%)
   );
   display: block;
   width: 100%;
@@ -126,9 +106,9 @@
 .round {
   width: 52px;
   height: 52px;
-  border: 1.5px solid var(--stage-line);
+  border: 1.5px solid var(--line);
   background: transparent;
-  color: var(--card-ink);
+  color: var(--ink);
 }
 
 .play {
@@ -141,7 +121,7 @@
 
 @media (hover: hover) {
   .round:hover {
-    border-color: var(--card-muted);
+    border-color: var(--ink-muted);
   }
 
   .play:hover {

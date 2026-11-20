@@ -17,15 +17,21 @@ describe('SettingsStore', () => {
       wordsPerFrame: 12,
       fontSize: 'huge',
       darkReader: 'yes',
+      focusColor: 'ultraviolet',
       removedLongAgo: true,
     });
     const settings = new SettingsStore(store);
     await settings.load();
     expect(settings.get()).toEqual({ ...DEFAULT_SETTINGS, wpm: 1000, wordsPerFrame: 3 });
 
-    await store.set(SETTINGS_KEY, { darkReader: true, fontSize: 72 });
+    await store.set(SETTINGS_KEY, { darkReader: true, fontSize: 72, focusColor: 'green' });
     await settings.load();
-    expect(settings.get()).toEqual({ ...DEFAULT_SETTINGS, darkReader: true, fontSize: 72 });
+    expect(settings.get()).toEqual({
+      ...DEFAULT_SETTINGS,
+      darkReader: true,
+      fontSize: 72,
+      focusColor: 'green',
+    });
   });
 
   it('persists updates and notifies subscribers', async () => {

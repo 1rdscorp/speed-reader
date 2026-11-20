@@ -4,6 +4,18 @@ export const MIN_FONT_SIZE = 32;
 export const MAX_FONT_SIZE = 80;
 export const FONT_SIZE_STEP = 4;
 
+/** Colours offered for the focus letter. Each id has a pair of shades in styles/tokens.css. */
+export const FOCUS_COLORS = [
+  { id: 'red', label: 'Red' },
+  { id: 'orange', label: 'Orange' },
+  { id: 'green', label: 'Green' },
+  { id: 'teal', label: 'Teal' },
+  { id: 'blue', label: 'Blue' },
+  { id: 'purple', label: 'Purple' },
+] as const;
+
+export type FocusColor = (typeof FOCUS_COLORS)[number]['id'];
+
 /**
  * Every user preference. To add one: add the field, its default, and a line in
  * `sanitize`. Saved settings are merged over the defaults, so existing users
@@ -17,6 +29,8 @@ export interface Settings {
   fontSize: number;
   /** Light text on a dark reading area. */
   darkReader: boolean;
+  /** Colour of the focus letter and the marks that point at it. */
+  focusColor: FocusColor;
   /** Linger after commas, sentences and paragraphs. */
   punctuationPauses: boolean;
 }
@@ -26,6 +40,7 @@ export const DEFAULT_SETTINGS: Settings = {
   wordsPerFrame: 1,
   fontSize: 56,
   darkReader: false,
+  focusColor: 'red',
   punctuationPauses: true,
 };
 
@@ -51,6 +66,9 @@ export function sanitize(saved: unknown): Settings {
     ),
     fontSize: clamp(input.fontSize, MIN_FONT_SIZE, MAX_FONT_SIZE, DEFAULT_SETTINGS.fontSize),
     darkReader: flag(input.darkReader, DEFAULT_SETTINGS.darkReader),
+    focusColor:
+      FOCUS_COLORS.find((color) => color.id === input.focusColor)?.id ??
+      DEFAULT_SETTINGS.focusColor,
     punctuationPauses: flag(input.punctuationPauses, DEFAULT_SETTINGS.punctuationPauses),
   };
 }

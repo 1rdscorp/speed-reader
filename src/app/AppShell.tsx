@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet } from 'react-router';
+import { Link, NavLink, Outlet, ScrollRestoration } from 'react-router';
 import { APP_NAME } from '@/lib/config';
 import type { NavItem } from '@/lib/feature';
 import { paths } from '@/lib/paths';
@@ -26,6 +26,8 @@ export function AppShell({ navItems }: { navItems: NavItem[] }) {
       <main>
         <Outlet />
       </main>
+      {/* A new page opens at its top; going back returns to where you were. */}
+      <ScrollRestoration />
       <footer className={styles.footer}>
         <div className={`container ${styles.footerBar}`}>
           <span>{APP_NAME} · hosted on GitHub Pages</span>

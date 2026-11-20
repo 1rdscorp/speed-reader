@@ -1,0 +1,22 @@
+/*
+ * The card text is read on. In its dark form it redefines the basic colour
+ * tokens, so everything placed inside it (rules, buttons, labels) follows.
+ */
+.surface {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.surface[data-dark] {
+  --surface: var(--night-bg);
+  --ink: var(--night-ink);
+  --ink-muted: var(--night-muted);
+  --line: var(--night-line);
+  --outline: var(--night-line);
+}
+
+.surface[data-dark] :focus-visible {
+  outline-color: var(--night-outline);
+}

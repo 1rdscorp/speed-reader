@@ -5,8 +5,8 @@ on the screen, with one letter of each word highlighted as the place to rest
 your eyes, so reading speed is set by a dial instead of by eye movement.
 
 It is being built in stages, to the design in the "Speed Reader – site mockup".
-**The reader is done**, along with a library and file import; the plan for the
-rest is [below](#stages).
+**The reader and its settings are done** (stages 1 and 2), along with a library
+and file import; the plan for the rest is [below](#stages).
 
 ## Running it
 
@@ -56,7 +56,8 @@ Reading:
   paragraphs are built in, not added on top. They can be switched off.
 - Play, pause, skip back or forward ten words, restart, or drag the progress
   bar to any position.
-- Choose the size of the word, and a dark reading area.
+- Choose the size of the word, the color of its focus letter, and a dark
+  reading area. The Settings page shows every setting with a live preview.
 - Keyboard: `Space` play/pause · `←` `→` ten words · `Shift` + `←` `→` sentence ·
   `↑` `↓` speed · `R` restart.
 
@@ -121,6 +122,7 @@ src/
     home/        The front page: introduction, how it works, the tools.
     reader/      The Read page: the reading area, its controls, adding text.
     library/     Everything saved: search, sort, rename, remove.
+    settings/    Reading settings, with a preview of their effect.
   app/         Composition: feature registry, routes, shell, service wiring.
   styles/      Design tokens and base styles.
   test/        Test setup and a helper that renders the whole app in memory.
@@ -154,7 +156,10 @@ The seams that let later stages slot in:
   one, write a reader (bytes in, title and text out) and add it to the list;
   detection, the file picker, drag and drop and link import pick it up.
 - **Settings** — one typed object with defaults (`src/lib/settings`). Saved
-  values are merged over defaults, so new settings need no migration.
+  values are merged over defaults, so new settings need no migration. Each
+  setting has one control (`controls.tsx`) that both the reader's Controls
+  panel and the Settings page use; a new setting needs its field, its default
+  and its control.
 - **Engine** — the `Player` emits snapshots and knows nothing about the UI.
   Statistics, training modes or a different display can subscribe to it.
 - **Design tokens** — the mockup's colours, type and spacing live in
@@ -174,11 +179,11 @@ The seams that let later stages slot in:
 The plan follows the tool cards on the front page.
 
 1. **RSVP Reader** — done. One word at a time with speed, pause and rewind.
-2. **Reading settings** — partly there: font size, the dark reading area, words
-   at a time and punctuation pauses are in the reader's Controls and are saved
-   in the browser. Still to come: the focus-letter colour and a Settings page.
-3. **Training drills** — word chunking, a pacer line and peripheral-vision
-   exercises.
+2. **Reading settings** — done. Font size, dark reading area and focus-letter
+   color, plus speed, words at a time and punctuation pauses, on a Settings
+   page with a live preview. All saved in the browser.
+3. **Training drills** — next. Word chunking, a pacer line and
+   peripheral-vision exercises.
 4. **Speed test and progress** — measure WPM with a short quiz and keep a
    history.
 

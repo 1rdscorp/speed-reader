@@ -51,6 +51,7 @@ const TOOLS: Tool[] = [
     stage: 2,
     title: 'Reading settings',
     text: 'Font size, dark mode and focus-letter color, saved in your browser.',
+    to: paths.settings(),
   },
   {
     icon: <DrillsToolIcon />,

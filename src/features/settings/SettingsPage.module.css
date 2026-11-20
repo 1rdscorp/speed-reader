@@ -1,0 +1,94 @@
+.page {
+  display: grid;
+  gap: var(--space-5);
+  padding-block: var(--space-6) var(--space-7);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: 1.15;
+}
+
+.lede {
+  margin-top: var(--space-2);
+  color: var(--ink-soft);
+  font-size: 1.0625rem;
+}
+
+/*
+ * Like the Read page: what you read on the left, what changes it on the right.
+ * On a narrow screen the preview comes first and the settings follow.
+ */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-5);
+}
+
+.preview {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: clamp(1.125rem, 4vw, 1.75rem);
+}
+
+@media (min-width: 56rem) {
+  .layout {
+    grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 1fr);
+  }
+
+  /* The preview stays in view while the settings scroll past. */
+  .preview {
+    position: sticky;
+    top: var(--space-5);
+  }
+}
+
+.previewMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.previewActions {
+  display: flex;
+  justify-content: center;
+}
+
+.groups {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.groupTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}

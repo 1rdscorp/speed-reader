@@ -17,8 +17,24 @@
   --accent: #2f4ac0;
   --accent-hover: #22378f;
   --accent-soft: #e8ecfb;
-  /* The focus letter and the marks that point at it. */
-  --focus-letter: #e03131;
+  /*
+   * Colours the reader can use for the focus letter and the marks that point
+   * at it. Each has a shade for the light reading area and one for the dark.
+   */
+  --focus-red: #e03131;
+  --focus-red-night: #ff6b6b;
+  --focus-orange: #d9480f;
+  --focus-orange-night: #ffa94d;
+  --focus-green: #2b8a3e;
+  --focus-green-night: #69db7c;
+  --focus-teal: #0c8599;
+  --focus-teal-night: #3bc9db;
+  --focus-blue: #1971c2;
+  --focus-blue-night: #4dabf7;
+  --focus-purple: #9c36b5;
+  --focus-purple-night: #da77f2;
+  /* The one in use. Red unless a reading surface says otherwise. */
+  --focus-letter: var(--focus-red);
   --progress: #4c6ef5;
   --track: #ecece6;
   --ready-bg: #e6f4ea;
@@ -30,7 +46,6 @@
   --night-ink: #f1f1ec;
   --night-muted: #a9acb5;
   --night-line: #34373f;
-  --night-focus-letter: #ff6b6b;
   --night-outline: #9db0ff;
 
   --font-sans: 'Inter Variable', Inter, system-ui, sans-serif;

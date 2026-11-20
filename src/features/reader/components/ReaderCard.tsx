@@ -1,7 +1,15 @@
 import type { CSSProperties } from 'react';
 import type { PivotSplit, PlayerStatus } from '@/core';
 import { formatClock, formatCount } from '@/lib/format';
-import { ForwardIcon, PauseIcon, PlayIcon, RestartIcon, RewindIcon, WordStage } from '@/ui';
+import {
+  ForwardIcon,
+  PauseIcon,
+  PlayIcon,
+  ReadingSurface,
+  RestartIcon,
+  RewindIcon,
+  WordStage,
+} from '@/ui';
 import { releaseFocusAfterPointer } from '../releaseFocus';
 import type { ReaderActions } from '../useReaderShortcuts';
 import styles from './ReaderCard.module.css';
@@ -21,6 +29,8 @@ interface ReaderCardProps {
   stepCount: number;
   fontSize: number;
   dark: boolean;
+  /** Name of the focus colour in use. */
+  focusColor: string;
   actions: ReaderActions;
   onSeek: (step: number) => void;
 }
@@ -36,6 +46,7 @@ export function ReaderCard({
   stepCount,
   fontSize,
   dark,
+  focusColor,
   actions,
   onSeek,
 }: ReaderCardProps) {
@@ -44,7 +55,12 @@ export function ReaderCard({
   const playing = status === 'playing';
 
   return (
-    <div className={styles.card} data-dark={dark || undefined} onClick={releaseFocusAfterPointer}>
+    <ReadingSurface
+      className={styles.card}
+      dark={dark}
+      focus={focusColor}
+      onClick={releaseFocusAfterPointer}
+    >
       <div className={styles.meta}>
         <span>
           Word {formatCount(wordNumber)} of {formatCount(wordTotal)}
@@ -102,6 +118,6 @@ export function ReaderCard({
           <RestartIcon />
         </button>
       </div>
-    </div>
+    </ReadingSurface>
   );
 }

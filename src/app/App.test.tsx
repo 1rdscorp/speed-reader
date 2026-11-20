@@ -42,17 +42,22 @@ describe('home page', () => {
     const tools = within(await screen.findByRole('region', { name: 'Tools' }));
 
     expect(tools.getByRole('link', { name: /RSVP Reader/ }).textContent).toContain('Stage 1');
-    for (const upcoming of ['Reading settings', 'Training drills', 'Speed test & progress']) {
+    expect(tools.getByRole('link', { name: /Reading settings/ }).textContent).toContain('Stage 2');
+    for (const upcoming of ['Training drills', 'Speed test & progress']) {
       expect(tools.getByRole('heading', { name: upcoming })).toBeTruthy();
       expect(tools.queryByRole('link', { name: new RegExp(upcoming) })).toBeNull();
     }
     expect(document.body.textContent).not.toMatch(/memory/i);
   });
 
-  it('has navigation to the reader and the library', async () => {
+  it('has navigation to every page that exists', async () => {
     renderApp();
     const nav = within(await screen.findByRole('navigation', { name: 'Main' }));
-    expect(nav.getAllByRole('link').map((link) => link.textContent)).toEqual(['Read', 'Library']);
+    expect(nav.getAllByRole('link').map((link) => link.textContent)).toEqual([
+      'Read',
+      'Library',
+      'Settings',
+    ]);
   });
 });
 
@@ -263,6 +268,7 @@ describe('reader', () => {
       wordsPerFrame: 1,
       fontSize: 72,
       darkReader: true,
+      focusColor: 'red',
       punctuationPauses: false,
     });
   });
@@ -291,6 +297,88 @@ describe('reader', () => {
     renderApp('/read/unknown');
     expect(await screen.findByRole('heading', { name: 'This text is not here' })).toBeTruthy();
     expect(screen.getByLabelText('Your text')).toBeTruthy();
+  });
+});
+
+describe('settings', () => {
+  const surface = () =>
+    screen.getByTestId('stage-word').closest('[style*="--focus-letter"]') as HTMLElement;
+  const focusLetter = () => surface().style.getPropertyValue('--focus-letter');
+
+  it('changes how the reading area looks, shown in a preview', async () => {
+    const { user, services } = renderApp('/settings');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Settings' })).toBeTruthy();
+    expect(focusLetter()).toBe('var(--focus-red)');
+
+    await user.click(screen.getByRole('radio', { name: 'Green' }));
+    expect(focusLetter()).toBe('var(--focus-green)');
+    expect(screen.getByRole('radio', { name: 'Green' })).toHaveProperty('checked', true);
+
+    await user.click(screen.getByLabelText('Dark reading area'));
+    expect(surface().hasAttribute('data-dark')).toBe(true);
+    expect(focusLetter()).toBe('var(--focus-green-night)');
+
+    fireEvent.change(screen.getByLabelText('Font size'), { target: { value: '40' } });
+    expect(
+      screen.getByTestId('stage-word').parentElement?.style.getPropertyValue('--word-size'),
+    ).toBe('40px');
+
+    await user.selectOptions(screen.getByLabelText('Words at a time'), '2 words');
+    expect(stageWord()).toBe('Reading settings');
+
+    expect(services.settings.get()).toMatchObject({
+      focusColor: 'green',
+      darkReader: true,
+      fontSize: 40,
+      wordsPerFrame: 2,
+    });
+  });
+
+  it('plays the preview on request', async () => {
+    const { user } = renderApp('/settings');
+    await user.click(await screen.findByRole('button', { name: 'Play preview' }));
+    expect(screen.getByRole('button', { name: 'Pause preview' })).toBeTruthy();
+    await waitFor(() => expect(stageWord()).not.toBe('Reading'));
+    await user.click(screen.getByRole('button', { name: 'Pause preview' }));
+    expect(screen.getByRole('button', { name: 'Play preview' })).toBeTruthy();
+  });
+
+  it('carries over to the reader', async () => {
+    const { services, documents } = await seeded({
+      text: 'Some words to read here.',
+      title: 'Story',
+    });
+    services.settings.update({ focusColor: 'blue', darkReader: true });
+    const { user } = renderApp(`/read/${documents[0]!.id}`, services);
+
+    await screen.findByRole('button', { name: 'Play' });
+    expect(focusLetter()).toBe('var(--focus-blue-night)');
+    expect(screen.getByText(/keep your eyes on the blue marks/)).toBeTruthy();
+
+    await user.click(screen.getByRole('link', { name: 'All settings' }));
+    expect(await screen.findByRole('radio', { name: 'Blue' })).toHaveProperty('checked', true);
+  });
+
+  it('resets to the defaults', async () => {
+    const { user, services } = renderApp('/settings');
+    const reset = await screen.findByRole('button', { name: 'Reset to defaults' });
+    expect(reset).toHaveProperty('disabled', true);
+
+    await user.click(screen.getByRole('radio', { name: 'Purple' }));
+    fireEvent.change(screen.getByLabelText('Speed'), { target: { value: '600' } });
+    expect(reset).toHaveProperty('disabled', false);
+
+    await user.click(reset);
+    expect(services.settings.get()).toEqual({
+      wpm: 300,
+      wordsPerFrame: 1,
+      fontSize: 56,
+      darkReader: false,
+      focusColor: 'red',
+      punctuationPauses: true,
+    });
+    expect(screen.getByRole('radio', { name: 'Red' })).toHaveProperty('checked', true);
+    expect(reset).toHaveProperty('disabled', true);
   });
 });
 
