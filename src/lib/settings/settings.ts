@@ -18,6 +18,19 @@ export type FocusColor = (typeof FOCUS_COLORS)[number]['id'];
 
 export type Theme = 'light' | 'dark';
 
+/** Colours the reading area can be given in full screen. Tints have a `--screen-<id>` token in styles/tokens.css. */
+export const SCREEN_COLORS = [
+  { id: 'dark', label: 'Dark' },
+  { id: 'white', label: 'White' },
+  { id: 'green', label: 'Green' },
+  { id: 'yellow', label: 'Yellow' },
+  { id: 'red', label: 'Red' },
+  { id: 'blue', label: 'Blue' },
+] as const;
+
+/** 'auto' means no choice has been made: full screen looks like the reading area on the page. */
+export type ScreenColor = (typeof SCREEN_COLORS)[number]['id'] | 'auto';
+
 /**
  * Every user preference. To add one: add the field, its default, and a line in
  * `sanitize`. Saved settings are merged over the defaults, so existing users
@@ -35,6 +48,8 @@ export interface Settings {
   darkReader: boolean;
   /** Colour of the focus letter and the marks that point at it. */
   focusColor: FocusColor;
+  /** Colour of the reading area in full screen. */
+  screenColor: ScreenColor;
   /** Linger after commas, sentences and paragraphs. */
   punctuationPauses: boolean;
 }
@@ -46,6 +61,7 @@ export const DEFAULT_SETTINGS: Settings = {
   fontSize: 56,
   darkReader: false,
   focusColor: 'red',
+  screenColor: 'auto',
   punctuationPauses: true,
 };
 
@@ -75,6 +91,9 @@ export function sanitize(saved: unknown): Settings {
     focusColor:
       FOCUS_COLORS.find((color) => color.id === input.focusColor)?.id ??
       DEFAULT_SETTINGS.focusColor,
+    screenColor:
+      SCREEN_COLORS.find((color) => color.id === input.screenColor)?.id ??
+      DEFAULT_SETTINGS.screenColor,
     punctuationPauses: flag(input.punctuationPauses, DEFAULT_SETTINGS.punctuationPauses),
   };
 }

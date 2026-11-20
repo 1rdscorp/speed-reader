@@ -269,8 +269,18 @@ describe('reader', () => {
     await user.keyboard('{ArrowUp}{ArrowRight}');
     expect(screen.getByText(/Word 11 of 20 · 325 WPM/)).toBeTruthy();
 
+    // The screen can be given a colour, which is remembered but only applies in full screen.
+    await user.click(screen.getByRole('button', { name: 'Yellow' }));
+    expect(card().getAttribute('data-screen')).toBe('yellow');
+    await user.click(screen.getByRole('button', { name: 'Dark' }));
+    expect(card().hasAttribute('data-dark')).toBe(true);
+    expect(services.settings.get().screenColor).toBe('dark');
+
     await user.click(screen.getByRole('button', { name: 'Exit full screen' }));
     expect(card().hasAttribute('data-fullscreen')).toBe(false);
+    expect(card().hasAttribute('data-screen')).toBe(false);
+    expect(card().hasAttribute('data-dark')).toBe(false);
+    expect(screen.queryByRole('group', { name: 'Screen color' })).toBeNull();
 
     await user.keyboard('f');
     expect(card().hasAttribute('data-fullscreen')).toBe(true);
@@ -325,6 +335,7 @@ describe('reader', () => {
       fontSize: 72,
       darkReader: true,
       focusColor: 'red',
+      screenColor: 'auto',
       punctuationPauses: false,
     });
   });
@@ -432,6 +443,7 @@ describe('settings', () => {
       fontSize: 56,
       darkReader: false,
       focusColor: 'red',
+      screenColor: 'auto',
       punctuationPauses: true,
     });
     expect(screen.getByRole('radio', { name: 'Red' })).toHaveProperty('checked', true);

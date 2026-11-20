@@ -12,7 +12,9 @@ export {
   FONT_SIZE_STEP,
   MAX_FONT_SIZE,
   MIN_FONT_SIZE,
+  SCREEN_COLORS,
   type FocusColor,
+  type ScreenColor,
   type Settings,
   type Theme,
 } from './settings';

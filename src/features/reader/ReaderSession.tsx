@@ -27,8 +27,16 @@ import { useReaderShortcuts, type ReaderActions } from './useReaderShortcuts';
  */
 export function ReaderSession({ document }: { document: ReadingDocument }) {
   const { settings } = useServices();
-  const { theme, wpm, fontSize, darkReader, focusColor, wordsPerFrame, punctuationPauses } =
-    useSettings();
+  const {
+    theme,
+    wpm,
+    fontSize,
+    darkReader,
+    focusColor,
+    screenColor,
+    wordsPerFrame,
+    punctuationPauses,
+  } = useSettings();
 
   const tokens = useMemo(() => tokenize(document.text), [document.text]);
   // Resume where the reader left off; a finished text starts over.
@@ -88,6 +96,8 @@ export function ReaderSession({ document }: { document: ReadingDocument }) {
         fontSize={fontSize}
         dark={darkReader || theme === 'dark'}
         focusColor={focusColor}
+        screenColor={screenColor}
+        onScreenColor={(color) => settings.update({ screenColor: color })}
         wpm={wpm}
         cardRef={cardRef}
         fullscreen={fullscreen.active}

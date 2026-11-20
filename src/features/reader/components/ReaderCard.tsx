@@ -1,6 +1,7 @@
 import type { CSSProperties, RefObject } from 'react';
 import type { PivotSplit, PlayerStatus } from '@/core';
 import { formatClock, formatCount } from '@/lib/format';
+import { SCREEN_COLORS, type ScreenColor } from '@/lib/settings';
 import {
   CollapseIcon,
   ExpandIcon,
@@ -37,6 +38,9 @@ interface ReaderCardProps {
   /** Name of the focus colour in use. */
   focusColor: string;
   wpm: number;
+  /** The colour chosen for full screen, and how to change it. */
+  screenColor: ScreenColor;
+  onScreenColor: (color: ScreenColor) => void;
   /** The card's own element, so it can be shown full screen. */
   cardRef: RefObject<HTMLDivElement | null>;
   fullscreen: boolean;
@@ -57,6 +61,8 @@ export function ReaderCard({
   dark,
   focusColor,
   wpm,
+  screenColor,
+  onScreenColor,
   cardRef,
   fullscreen,
   actions,
@@ -65,14 +71,18 @@ export function ReaderCard({
   const lastStep = Math.max(stepCount - 1, 1);
   const fraction = status === 'finished' ? 1 : step / lastStep;
   const playing = status === 'playing';
+  // A colour chosen for full screen replaces the page's look while full screen lasts.
+  const screen = fullscreen && screenColor !== 'auto' ? screenColor : undefined;
+  const isDark = screen ? screen === 'dark' : dark;
 
   return (
     <ReadingSurface
       ref={cardRef}
       className={styles.card}
-      dark={dark}
+      dark={isDark}
       focus={focusColor}
       data-fullscreen={fullscreen || undefined}
+      data-screen={screen}
       onClick={releaseFocusAfterPointer}
     >
       <div className={styles.meta}>
@@ -81,6 +91,22 @@ export function ReaderCard({
           {/* The speed control is out of sight in full screen, so say what it is set to. */}
           {fullscreen && ` · ${wpm} WPM`}
         </span>
+        {fullscreen && (
+          <span className={styles.screens} role="group" aria-label="Screen color">
+            {SCREEN_COLORS.map((color) => (
+              <button
+                key={color.id}
+                type="button"
+                className={styles.screenChoice}
+                data-color={color.id}
+                aria-label={color.label}
+                title={color.label}
+                aria-pressed={screenColor === color.id}
+                onClick={() => onScreenColor(color.id)}
+              />
+            ))}
+          </span>
+        )}
         <span className={styles.metaEnd}>
           {formatClock(status === 'finished' ? 0 : remainingMs)} left
           <button
