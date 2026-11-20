@@ -82,7 +82,10 @@ export function AddText() {
     event.preventDefault();
     setError(null);
     try {
-      const created = await documents.create(await generatePracticeText({ topic, length }));
+      const generated = await generatePracticeText({ topic, length });
+      const created = await documents.create(generated);
+      // Show what was generated in the text box as well, where it can be read over or edited.
+      setText(generated.text);
       await navigate(paths.read(created.id));
     } catch {
       setError(SAVE_FAILED);

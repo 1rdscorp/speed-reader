@@ -157,6 +157,11 @@ describe('adding text', () => {
     // The text opens on the heading of its first passage.
     expect(saved!.title.startsWith(stageWord() ?? '?')).toBe(true);
 
+    // The generated text is also placed in the text box.
+    const box = screen.getByLabelText('Your text') as HTMLTextAreaElement;
+    expect(box.value.startsWith(saved!.title.replace(' and 1 more', ''))).toBe(true);
+    expect(box.value.length).toBeGreaterThan(500);
+
     // A second one is a new text, not a replacement.
     await user.click(screen.getByRole('button', { name: 'Generate text' }));
     await waitFor(async () => expect(await services.documents.list()).toHaveLength(2));
