@@ -1,3 +1,4 @@
+import { gamesFeature } from '@/features/games';
 import { homeFeature } from '@/features/home';
 import { libraryFeature } from '@/features/library';
 import { readerFeature } from '@/features/reader';
@@ -12,5 +13,6 @@ export const FEATURES: FeatureModule[] = [
   homeFeature,
   readerFeature,
   libraryFeature,
+  gamesFeature,
   settingsFeature,
 ];

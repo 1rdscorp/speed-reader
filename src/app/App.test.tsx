@@ -64,6 +64,7 @@ describe('home page', () => {
     expect(nav.getAllByRole('link').map((link) => link.textContent)).toEqual([
       'Read',
       'Library',
+      'Games',
       'Settings',
     ]);
   });
@@ -547,6 +548,23 @@ describe('library', () => {
     await user.click(screen.getByRole('link', { name: 'Add a text' }));
     expect(await screen.findByLabelText('Your text')).toBeTruthy();
     expect(router.state.location.pathname).toBe('/read');
+  });
+});
+
+describe('games', () => {
+  it('lists the games and opens one in a frame', async () => {
+    const { user } = renderApp('/games');
+    expect(await screen.findByRole('link', { name: /Flying Mile/ })).toBeTruthy();
+    await user.click(screen.getByRole('link', { name: /Keystorm/ }));
+
+    const frame = (await screen.findByTitle('Keystorm')) as HTMLIFrameElement;
+    expect(frame.getAttribute('src')).toMatch(/games\/keystorm\.html$/);
+    expect(screen.getByRole('link', { name: 'All games' })).toBeTruthy();
+  });
+
+  it('says so when a game does not exist', async () => {
+    renderApp('/games/nope');
+    expect(await screen.findByRole('heading', { name: /no game at this address/ })).toBeTruthy();
   });
 });
 

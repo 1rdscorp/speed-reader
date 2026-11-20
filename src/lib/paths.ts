@@ -7,5 +7,6 @@ export const paths = {
   /** The reader: a given document, or whatever was read last. */
   read: (documentId?: string) => (documentId ? `/read/${documentId}` : '/read'),
   library: () => '/library',
+  games: (gameId?: string) => (gameId ? `/games/${gameId}` : '/games'),
   settings: () => '/settings',
 };

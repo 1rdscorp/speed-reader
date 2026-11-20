@@ -131,6 +131,8 @@ src/
     reader/      The Read page: the reading area, its controls, adding text.
     library/     Everything saved: search, sort, rename, remove.
     settings/    Reading settings, with a preview of their effect.
+    games/       Typing games. Each is a self-contained page in public/games/,
+                 shown in a frame; add one by listing it in games.ts.
   app/         Composition: feature registry, routes, shell, service wiring.
   styles/      Design tokens and base styles.
   test/        Test setup and a helper that renders the whole app in memory.
