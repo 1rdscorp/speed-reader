@@ -84,6 +84,7 @@ Stereograms:
   from a seed (`src/lib/stereograms`), so no image files are shipped.
 - Each is shown against a 30-second timer that can be paused; when the time is
   up, "Show image" reveals the hidden word.
+- The picture can fill the screen, with its timer and buttons.
 - Add stereogram pictures of your own, with an optional answer. They follow the
   built-in ones and are saved in the browser.
 

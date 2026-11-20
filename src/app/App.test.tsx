@@ -613,6 +613,24 @@ describe('stereograms', () => {
     expect(screen.getByText('Stereogram 50 of 50')).toBeTruthy();
   });
 
+  it('can fill the screen, and comes back with Escape', async () => {
+    const { user } = renderApp('/stereograms');
+    await screen.findByText('Stereogram 1 of 50');
+    const viewer = screen.getByRole('region', { name: 'Stereogram' });
+    expect(viewer.hasAttribute('data-fullscreen')).toBe(false);
+
+    await user.click(screen.getByRole('button', { name: 'Full screen' }));
+    expect(viewer.hasAttribute('data-fullscreen')).toBe(true);
+    // The timer and the buttons come along.
+    expect(within(viewer).getByRole('button', { name: 'Pause' })).toBeTruthy();
+
+    await user.keyboard('{Escape}');
+    expect(viewer.hasAttribute('data-fullscreen')).toBe(false);
+    await user.click(screen.getByRole('button', { name: 'Full screen' }));
+    await user.click(screen.getByRole('button', { name: 'Exit full screen' }));
+    expect(viewer.hasAttribute('data-fullscreen')).toBe(false);
+  });
+
   it('offers to show the hidden word only when the time is up', async () => {
     vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
     const { user } = renderApp('/stereograms');

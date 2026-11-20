@@ -14,10 +14,10 @@ import {
 import type { ReadingDocument } from '@/lib/documents';
 import { useServices } from '@/lib/services';
 import { useSettings } from '@/lib/settings';
+import { useFullscreen } from '@/lib/useFullscreen';
 import { usePlayback } from '@/lib/usePlayback';
 import { ReaderCard, SKIP_WORDS } from './components/ReaderCard';
 import styles from './Reader.module.css';
-import { useFullscreen } from './useFullscreen';
 import { useProgressSync } from './useProgressSync';
 import { useReaderShortcuts, type ReaderActions } from './useReaderShortcuts';
 

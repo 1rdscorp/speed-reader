@@ -156,3 +156,32 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+.metaEnd {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/*
+ * Full screen. The browser's own full screen sizes the viewer to the display;
+ * where that is unavailable these rules stretch it over the window instead.
+ */
+.viewer[data-fullscreen] {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  padding: clamp(0.75rem, 2vw, 1.5rem);
+  border: 0;
+  border-radius: 0;
+  overflow-y: auto;
+}
+
+/* The picture takes all the room the timer and buttons leave, keeping its shape. */
+.viewer[data-fullscreen] .picture {
+  flex: 1;
+  min-height: 0;
+  max-width: none;
+  height: 0;
+  object-fit: contain;
+}

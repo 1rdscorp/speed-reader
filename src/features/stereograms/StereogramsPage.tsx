@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { APP_NAME } from '@/lib/config';
 import { useServices } from '@/lib/services';
 import { HIDDEN_WORDS, type OwnStereogram } from '@/lib/stereograms';
 import { useAsync } from '@/lib/useAsync';
-import { Button } from '@/ui';
+import { useFullscreen } from '@/lib/useFullscreen';
+import { Button, CollapseIcon, ExpandIcon, IconButton } from '@/ui';
 import { AddOwn } from './AddOwn';
 import { BuiltInPicture } from './BuiltInPicture';
 import { OwnPicture } from './OwnPicture';
@@ -22,6 +23,8 @@ export function StereogramsPage() {
   const [remaining, setRemaining] = useState(SECONDS);
   const [paused, setPaused] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const viewerRef = useRef<HTMLElement>(null);
+  const fullscreen = useFullscreen(viewerRef);
 
   // A picture that was removed while it was showing leaves the position past the end.
   const index = Math.min(position, total - 1);
@@ -54,14 +57,28 @@ export function StereogramsPage() {
         </p>
       </header>
 
-      <section className={styles.viewer} aria-label="Stereogram">
+      <section
+        ref={viewerRef}
+        className={styles.viewer}
+        aria-label="Stereogram"
+        data-fullscreen={fullscreen.active || undefined}
+      >
         <div className={styles.meta}>
           <span>
             Stereogram {index + 1} of {total}
             {ownEntry ? ` · ${ownEntry.name}` : ''}
           </span>
-          <span className={styles.time} role="timer" aria-label="Time left">
-            0:{String(remaining).padStart(2, '0')}
+          <span className={styles.metaEnd}>
+            <span className={styles.time} role="timer" aria-label="Time left">
+              0:{String(remaining).padStart(2, '0')}
+            </span>
+            <IconButton
+              label={fullscreen.active ? 'Exit full screen' : 'Full screen'}
+              aria-pressed={fullscreen.active}
+              onClick={fullscreen.toggle}
+            >
+              {fullscreen.active ? <CollapseIcon /> : <ExpandIcon />}
+            </IconButton>
           </span>
         </div>
         <div
