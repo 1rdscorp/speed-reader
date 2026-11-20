@@ -76,8 +76,9 @@ The seams that let later stages slot in:
   (documents, settings). Components get them from `useServices()`;
   `src/app/createServices.ts` is the single place that picks implementations.
 - **Storage** — everything persists through the small async `KeyValueStore`
-  interface. Today it is localStorage; IndexedDB or a server can replace it in
-  `createServices.ts` without touching callers.
+  interface. Today it is localStorage (memory when the browser blocks storage);
+  IndexedDB or a server can replace it in `createServices.ts` without touching
+  callers.
 - **Documents** — the reader opens a document by id (`/read/:id`) from the
   `DocumentRepository`. Anything that can produce text and call `create()`
   (file import, URL import) immediately works with the reader. Positions are

@@ -17,7 +17,7 @@ export class StorageFullError extends Error {
   }
 }
 
-/** Volatile store for tests and for environments where nothing can be persisted. */
+/** Volatile store, for tests and for browsers where nothing can be persisted. */
 export function createMemoryStore(): KeyValueStore {
   const values = new Map<string, string>();
   return {
