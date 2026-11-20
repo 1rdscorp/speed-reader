@@ -582,7 +582,11 @@ describe('stereograms', () => {
   afterEach(() => {
     vi.useRealTimers();
   });
-  const tick = (seconds: number) => act(() => void vi.advanceTimersByTime(seconds * 1000));
+  function tick(seconds: number) {
+    // First let the page finish starting its timer, then move the clock.
+    act(() => {});
+    act(() => void vi.advanceTimersByTime(seconds * 1000));
+  }
   const timeLeft = () => screen.getByRole('timer').textContent;
 
   it('shows fifty pictures, each against a 30-second timer that can be paused', async () => {
