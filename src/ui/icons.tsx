@@ -69,6 +69,19 @@ export const CollapseIcon = () => (
   </Icon>
 );
 
+export const SunIcon = () => (
+  <Icon size={20}>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
+  </Icon>
+);
+
+export const MoonIcon = () => (
+  <Icon size={20}>
+    <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z" />
+  </Icon>
+);
+
 export const ArrowRightIcon = () => (
   <Icon size={18}>
     <path d="M5 12h14M13 6l6 6-6 6" />

@@ -17,6 +17,8 @@
   --accent: #2f4ac0;
   --accent-hover: #22378f;
   --accent-soft: #e8ecfb;
+  /* Text and icons drawn on top of the accent colour. */
+  --on-accent: #ffffff;
   /*
    * Colours the reader can use for the focus letter and the marks that point
    * at it. Each has a shade for the light reading area and one for the dark.
@@ -78,4 +80,33 @@
 
   --shadow-card: 0 12px 32px rgb(22 24 29 / 8%);
   --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/*
+ * The dark theme, chosen with the button in the header. It redefines the
+ * colours above and nothing else; the reading area's dark form uses the same
+ * family of values.
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0e0f12;
+  --surface: #16181d;
+  --ink: #f1f1ec;
+  --ink-soft: #c4c6cc;
+  --ink-muted: #a9acb5;
+  --line: #2c2f37;
+  --outline: #555a66;
+  --accent: #748ffc;
+  --accent-hover: #91a7ff;
+  --accent-soft: #232a4d;
+  --on-accent: #0e0f12;
+  --focus-letter: var(--focus-red-night);
+  --progress: #748ffc;
+  --track: #2c2f37;
+  --ready-bg: #16331f;
+  --ready-ink: #8ce99a;
+  --later-bg: #24262c;
+  --danger: #ff8787;
+  --shadow-card: 0 12px 32px rgb(0 0 0 / 40%);
 }

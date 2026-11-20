@@ -18,8 +18,10 @@ import { SettingsPreview } from './SettingsPreview';
 export function SettingsPage() {
   const { settings: store } = useServices();
   const settings = useSettings();
-  const isDefault = (Object.keys(DEFAULT_SETTINGS) as Array<keyof Settings>).every(
-    (key) => settings[key] === DEFAULT_SETTINGS[key],
+  // The light or dark theme is chosen in the header and is not a reading setting, so a reset leaves it alone.
+  const defaults: Settings = { ...DEFAULT_SETTINGS, theme: settings.theme };
+  const isDefault = (Object.keys(defaults) as Array<keyof Settings>).every(
+    (key) => settings[key] === defaults[key],
   );
 
   return (
@@ -54,7 +56,7 @@ export function SettingsPage() {
           </section>
 
           <div className={styles.footer}>
-            <Button disabled={isDefault} onClick={() => store.update(DEFAULT_SETTINGS)}>
+            <Button disabled={isDefault} onClick={() => store.update(defaults)}>
               Reset to defaults
             </Button>
             <span>Your settings are saved in this browser.</span>

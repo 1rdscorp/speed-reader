@@ -50,6 +50,14 @@ describe('home page', () => {
     expect(document.body.textContent).not.toMatch(/memory/i);
   });
 
+  it('switches the whole site between light and dark', async () => {
+    const { user, services } = renderApp();
+    await user.click(await screen.findByRole('button', { name: 'Switch to dark theme' }));
+    expect(services.settings.get().theme).toBe('dark');
+    await user.click(screen.getByRole('button', { name: 'Switch to light theme' }));
+    expect(services.settings.get().theme).toBe('light');
+  });
+
   it('has navigation to every page that exists', async () => {
     renderApp();
     const nav = within(await screen.findByRole('navigation', { name: 'Main' }));
@@ -311,6 +319,7 @@ describe('reader', () => {
 
     fireEvent.click(screen.getByLabelText('Pause longer on punctuation'));
     expect(services.settings.get()).toEqual({
+      theme: 'light',
       wpm: 450,
       wordsPerFrame: 1,
       fontSize: 72,
@@ -417,6 +426,7 @@ describe('settings', () => {
 
     await user.click(reset);
     expect(services.settings.get()).toEqual({
+      theme: 'light',
       wpm: 300,
       wordsPerFrame: 1,
       fontSize: 56,

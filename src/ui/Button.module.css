@@ -27,7 +27,7 @@
 .primary,
 .primary:hover {
   background: var(--accent);
-  color: #ffffff;
+  color: var(--on-accent);
 }
 
 .secondary,

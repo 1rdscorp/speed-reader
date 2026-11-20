@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="light" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#ffffff" />
     <meta
       name="description"
@@ -11,6 +11,15 @@
     />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <title>Speed Reader</title>
+    <script>
+      // Apply a saved dark theme before the first paint, so the page never flashes light.
+      // Mirrors applyTheme() in src/lib/settings/theme.ts.
+      try {
+        if (JSON.parse(localStorage.getItem('speed-reader:settings')).theme === 'dark') {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

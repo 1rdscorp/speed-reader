@@ -16,12 +16,16 @@ export const FOCUS_COLORS = [
 
 export type FocusColor = (typeof FOCUS_COLORS)[number]['id'];
 
+export type Theme = 'light' | 'dark';
+
 /**
  * Every user preference. To add one: add the field, its default, and a line in
  * `sanitize`. Saved settings are merged over the defaults, so existing users
  * pick up new fields without a migration.
  */
 export interface Settings {
+  /** Light or dark, for the whole site. */
+  theme: Theme;
   wpm: number;
   /** How many words are shown at once. */
   wordsPerFrame: number;
@@ -36,6 +40,7 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
+  theme: 'light',
   wpm: DEFAULT_WPM,
   wordsPerFrame: 1,
   fontSize: 56,
@@ -57,6 +62,7 @@ export function sanitize(saved: unknown): Settings {
   const flag = (value: unknown, fallback: boolean) =>
     typeof value === 'boolean' ? value : fallback;
   return {
+    theme: input.theme === 'dark' ? 'dark' : DEFAULT_SETTINGS.theme,
     wpm: typeof input.wpm === 'number' ? clampWpm(input.wpm) : DEFAULT_SETTINGS.wpm,
     wordsPerFrame: clamp(
       input.wordsPerFrame,

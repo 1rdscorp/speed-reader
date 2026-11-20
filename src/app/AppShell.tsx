@@ -4,6 +4,7 @@ import type { NavItem } from '@/lib/feature';
 import { paths } from '@/lib/paths';
 import { Logo } from '@/ui';
 import styles from './AppShell.module.css';
+import { ThemeToggle } from './ThemeToggle';
 
 /** The frame around every page: logo, the navigation contributed by features, footer. */
 export function AppShell({ navItems }: { navItems: NavItem[] }) {
@@ -20,6 +21,7 @@ export function AppShell({ navItems }: { navItems: NavItem[] }) {
                 {item.label}
               </NavLink>
             ))}
+            <ThemeToggle />
           </nav>
         </div>
       </header>

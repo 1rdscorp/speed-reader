@@ -14,6 +14,8 @@ export {
   MIN_FONT_SIZE,
   type FocusColor,
   type Settings,
+  type Theme,
 } from './settings';
 export { SETTINGS_KEY, SettingsStore } from './settingsStore';
+export { applyTheme } from './theme';
 export { useSettings } from './useSettings';
