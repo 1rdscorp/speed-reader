@@ -1,30 +1,16 @@
-import { EYE_SEPARATION, seededRandom, separation, stereogram } from '@/lib/stereograms';
+import { separation, stereogram } from '@/lib/stereograms';
+import { drawTexture } from './textures';
 
-/** The size every built-in picture is drawn at. */
-export const WIDTH = 960;
-export const HEIGHT = 480;
+/** Every built-in picture is drawn at 4K UHD. */
+export const WIDTH = 3840;
+export const HEIGHT = 2160;
+/** Distance between the eyes, in pixels of the picture. It sets how wide the repeating strip is. */
+const EYE_SEPARATION = 520;
+/** The least distance, in pixels, over which the edge of a letter slopes up. */
+const SLOPE = 40;
 
-type Rgb = [number, number, number];
-
-function hslToRgb(hue: number, saturation: number, lightness: number): Rgb {
-  const chroma = saturation * Math.min(lightness, 1 - lightness);
-  const channel = (n: number) => {
-    const k = (n + hue / 30) % 12;
-    return Math.round(255 * (lightness - chroma * Math.max(-1, Math.min(k - 3, 9 - k, 1))));
-  };
-  return [channel(0), channel(8), channel(4)];
-}
-
-/** A handful of dot colours around one hue, from dark to light, different for each picture. */
-function palette(index: number, random: () => number): Rgb[] {
-  const hue = (index * 47) % 360;
-  return [0.14, 0.32, 0.5, 0.68, 0.88].map((lightness) =>
-    hslToRgb((hue + random() * 70 + 325) % 360, 0.55 + random() * 0.35, lightness),
-  );
-}
-
-/** Draw the word in white on black: white is what stands out. Returns false where drawing is unavailable. */
-function drawWord(context: CanvasRenderingContext2D, word: string) {
+/** Draw the word in white on black: white is what stands out. Returns the height of its letters. */
+function drawWord(context: CanvasRenderingContext2D, word: string): number {
   context.fillStyle = '#000000';
   context.fillRect(0, 0, WIDTH, HEIGHT);
   context.fillStyle = '#ffffff';
@@ -32,12 +18,47 @@ function drawWord(context: CanvasRenderingContext2D, word: string) {
   context.textBaseline = 'middle';
   // As large as fits, keeping clear of the edges, where the picture has nothing to repeat from.
   const room = WIDTH - 2 * EYE_SEPARATION;
-  let size = 300;
+  let size = 1100;
   context.font = `900 ${size}px Arial, Helvetica, sans-serif`;
   const measured = context.measureText(word).width;
   if (measured > room) size = Math.floor((size * room) / measured);
   context.font = `900 ${size}px Arial, Helvetica, sans-serif`;
-  context.fillText(word, WIDTH / 2, HEIGHT / 2 + 18);
+  context.fillText(word, WIDTH / 2, HEIGHT / 2 + size * 0.06);
+  return size;
+}
+
+/** Blur a depth map by averaging each pixel with those within `radius`, across and then down. */
+function soften(depth: Uint8Array, width: number, height: number, radius: number): Uint8Array {
+  const span = radius * 2 + 1;
+  const line = new Uint8Array(width);
+  for (let y = 0; y < height; y += 1) {
+    const row = y * width;
+    line.set(depth.subarray(row, row + width));
+    let sum = 0;
+    for (let x = 0; x < radius; x += 1) sum += line[x]!;
+    for (let x = 0; x < width; x += 1) {
+      if (x + radius < width) sum += line[x + radius]!;
+      depth[row + x] = sum / span;
+      if (x >= radius) sum -= line[x - radius]!;
+    }
+  }
+
+  const softened = new Uint8Array(depth.length);
+  const sums = new Int32Array(width);
+  for (let y = 0; y < radius; y += 1) {
+    for (let x = 0; x < width; x += 1) sums[x]! += depth[y * width + x]!;
+  }
+  for (let y = 0; y < height; y += 1) {
+    const entering = (y + radius) * width;
+    const leaving = (y - radius) * width;
+    const row = y * width;
+    for (let x = 0; x < width; x += 1) {
+      if (y + radius < height) sums[x]! += depth[entering + x]!;
+      softened[row + x] = sums[x]! / span;
+      if (y >= radius) sums[x]! -= depth[leaving + x]!;
+    }
+  }
+  return softened;
 }
 
 /**
@@ -53,35 +74,39 @@ export function drawStereogram(
 ) {
   const context = canvas.getContext('2d', { willReadFrequently: true });
   if (!context) return;
-  drawWord(context, word);
+  const size = drawWord(context, word);
   if (revealed) return;
 
-  const source = context.getImageData(0, 0, WIDTH, HEIGHT).data;
-  const depth = new Float32Array(WIDTH * HEIGHT);
-  for (let i = 0; i < depth.length; i += 1) depth[i] = (source[i * 4] ?? 0) / 255;
+  const strip = separation(0, EYE_SEPARATION);
+  const texture = drawTexture(index, strip, HEIGHT);
+  if (!texture) return;
 
-  const random = seededRandom(1000 + index);
-  const colors = palette(index, random);
-  const dots = stereogram(depth, WIDTH, HEIGHT, colors.length, random);
+  const source = context.getImageData(0, 0, WIDTH, HEIGHT).data;
+  const depth = new Uint8Array(WIDTH * HEIGHT);
+  for (let i = 0; i < depth.length; i += 1) depth[i] = source[i * 4]!;
+  // The letters rise on a gentle slope, like something pressed up from behind.
+  // A sharp edge would tear the texture; a slope only bends it.
+  const slope = Math.max(SLOPE, Math.round(size * 0.06));
+
   const image = context.createImageData(WIDTH, HEIGHT);
-  for (let i = 0; i < dots.length; i += 1) {
-    const [red, green, blue] = colors[dots[i]!]!;
-    image.data[i * 4] = red;
-    image.data[i * 4 + 1] = green;
-    image.data[i * 4 + 2] = blue;
-    image.data[i * 4 + 3] = 255;
-  }
+  stereogram({
+    depth: soften(depth, WIDTH, HEIGHT, slope),
+    width: WIDTH,
+    height: HEIGHT,
+    eyeSeparation: EYE_SEPARATION,
+    texture,
+    into: new Uint32Array(image.data.buffer),
+  });
   context.putImageData(image, 0, 0);
 
   // Two guide dots: relax the eyes until they become three, and the picture is in focus.
-  const apart = separation(0);
-  for (const x of [WIDTH / 2 - apart / 2, WIDTH / 2 + apart / 2]) {
+  for (const x of [WIDTH / 2 - strip / 2, WIDTH / 2 + strip / 2]) {
     context.beginPath();
-    context.arc(x, 22, 9, 0, Math.PI * 2);
+    context.arc(x, 88, 36, 0, Math.PI * 2);
     context.fillStyle = '#ffffff';
     context.fill();
     context.beginPath();
-    context.arc(x, 22, 6, 0, Math.PI * 2);
+    context.arc(x, 88, 24, 0, Math.PI * 2);
     context.fillStyle = '#000000';
     context.fill();
   }

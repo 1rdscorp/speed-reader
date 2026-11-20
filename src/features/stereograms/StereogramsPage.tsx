@@ -9,6 +9,7 @@ import { AddOwn } from './AddOwn';
 import { BuiltInPicture } from './BuiltInPicture';
 import { OwnPicture } from './OwnPicture';
 import styles from './Stereograms.module.css';
+import { styleName } from './textures';
 
 /** How long each picture is shown before the answer is offered. */
 const SECONDS = 30;
@@ -67,6 +68,7 @@ export function StereogramsPage() {
           <span>
             Stereogram {index + 1} of {total}
             {ownEntry ? ` · ${ownEntry.name}` : ''}
+            {word !== undefined && <span> · {styleName(index)}</span>}
           </span>
           <span className={styles.metaEnd}>
             <span className={styles.time} role="timer" aria-label="Time left">

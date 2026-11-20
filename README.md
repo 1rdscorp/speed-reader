@@ -80,8 +80,11 @@ Getting text in:
 
 Stereograms:
 
-- Fifty built-in stereograms, each hiding a word. They are drawn in the browser
-  from a seed (`src/lib/stereograms`), so no image files are shipped.
+- Fifty built-in stereograms, each hiding a word, drawn at 4K UHD (3840 × 2160).
+  They come in ten styles (confetti, marble, mosaic, facets, camouflage,
+  contours, galaxy, bubbles, brush strokes and leaves), each in several colour
+  sets. They are drawn in the browser from a seed (`src/lib/stereograms` and
+  `src/features/stereograms/textures.ts`), so no image files are shipped.
 - Each is shown against a 30-second timer that can be paused; when the time is
   up, "Show image" reveals the hidden word.
 - The picture can fill the screen, with its timer and buttons.
@@ -134,8 +137,9 @@ src/
                  each loaded only when first needed.
     practice/    Practice texts: a bank of short passages and the generator
                  that assembles them by topic and length.
-    stereograms/ The random-dot stereogram generator, the hidden words, and
-                 storage for pictures the person adds.
+    stereograms/ The stereogram generator (any texture, bent over a depth
+                 map), smooth noise, the hidden words, and storage for
+                 pictures the person adds.
   ui/          Shared presentational components: buttons, icons, logo, and the
                word stage with its focus marks.
   features/    One folder per feature, each a self-contained slice.
