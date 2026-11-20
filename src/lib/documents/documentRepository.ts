@@ -1,11 +1,14 @@
 import { countWords } from '@/core';
 import type { KeyValueStore } from '@/lib/storage';
+import { normalizeText } from './normalize';
 import { deriveTitle } from './title';
 import type { DocumentMeta, DocumentRepository, NewDocument, ReadingProgress } from './types';
 
 // Metadata lives in one index entry so listing never loads document bodies.
-const INDEX_KEY = 'documents/index';
-const textKey = (id: string) => `documents/text/${id}`;
+export const INDEX_KEY = 'documents/index';
+export const textKey = (id: string) => `documents/text/${id}`;
+
+const cleanTitle = (title: string) => title.replace(/\s+/g, ' ').trim();
 
 function createId(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(9));
@@ -25,6 +28,17 @@ export function createDocumentRepository(
     const result = queue.then(task);
     queue = result.catch(() => {});
     return result;
+  }
+  /** Replace one document's metadata; a no-op if it has been removed. */
+  function update(id: string, change: (document: DocumentMeta) => DocumentMeta): Promise<void> {
+    return exclusive(async () => {
+      const index = await readIndex();
+      if (!index.some((document) => document.id === id)) return;
+      await store.set(
+        INDEX_KEY,
+        index.map((document) => (document.id === id ? change(document) : document)),
+      );
+    });
   }
   // Reads wait for writes already under way, so a list requested right after
   // a save (leaving the reader for the start page) reflects that save.
@@ -47,18 +61,19 @@ export function createDocumentRepository(
 
     create(input: NewDocument) {
       return exclusive(async () => {
+        const text = normalizeText(input.text);
         const timestamp = now();
         const meta: DocumentMeta = {
           id: createId(),
-          title: input.title?.trim() || deriveTitle(input.text),
+          title: cleanTitle(input.title ?? '') || deriveTitle(text),
           source: input.source,
-          wordCount: countWords(input.text),
+          wordCount: countWords(text),
           createdAt: timestamp,
           lastReadAt: timestamp,
           progress: { offset: 0, fraction: 0 },
         };
         // Text first: if it does not fit, nothing is left pointing at a missing body.
-        await store.set(textKey(meta.id), input.text);
+        await store.set(textKey(meta.id), text);
         try {
           await store.set(INDEX_KEY, [...(await readIndex()), meta]);
         } catch (error) {
@@ -69,17 +84,14 @@ export function createDocumentRepository(
       });
     },
 
+    rename(id: string, title: string) {
+      const cleaned = cleanTitle(title);
+      if (cleaned === '') return Promise.resolve();
+      return update(id, (document) => ({ ...document, title: cleaned }));
+    },
+
     saveProgress(id: string, progress: ReadingProgress) {
-      return exclusive(async () => {
-        const index = await readIndex();
-        if (!index.some((document) => document.id === id)) return;
-        await store.set(
-          INDEX_KEY,
-          index.map((document) =>
-            document.id === id ? { ...document, progress, lastReadAt: now() } : document,
-          ),
-        );
-      });
+      return update(id, (document) => ({ ...document, progress, lastReadAt: now() }));
     },
 
     remove(id: string) {

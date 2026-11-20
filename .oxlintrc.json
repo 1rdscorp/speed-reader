@@ -4,7 +4,12 @@
   "rules": {
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+    "react/only-export-components": [
+      "warn",
+      {
+        "allowConstantExport": true
+      }
+    ]
   },
   "overrides": [
     {
@@ -49,6 +54,22 @@
               {
                 "group": ["@/app/**", "@/features/**"],
                 "message": "Features are independent slices: share code through lib/, ui/ or core/, and use relative imports inside a feature."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["server/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/**", "../src/**", "react", "react-*"],
+                "message": "server/ runs outside the browser and must not depend on the app."
               }
             ]
           }

@@ -1,40 +1,34 @@
 import { Link } from 'react-router';
-import type { DocumentMeta } from '@/lib/documents';
+import { describeProgress, type DocumentMeta } from '@/lib/documents';
 import { formatCount } from '@/lib/format';
 import { paths } from '@/lib/paths';
-import { CloseIcon, IconButton } from '@/ui';
 import styles from './HomePage.module.css';
 
-function progressLabel(fraction: number): string {
-  if (fraction >= 1) return 'Finished';
-  const percent = Math.round(fraction * 100);
-  return percent === 0 ? 'Not started' : `${percent}% read`;
-}
+/** How many texts the start page shows before pointing to the library. */
+const SHOWN = 5;
 
-interface RecentListProps {
-  documents: DocumentMeta[];
-  onRemove: (document: DocumentMeta) => void;
-}
-
-export function RecentList({ documents, onRemove }: RecentListProps) {
+/** The texts read most recently, as a shortcut back into them. The library has the rest. */
+export function RecentList({ documents }: { documents: DocumentMeta[] }) {
   return (
     <section aria-labelledby="recent-title">
-      <h2 id="recent-title" className={styles.recentTitle}>
-        Recent
-      </h2>
+      <div className={styles.recentHeader}>
+        <h2 id="recent-title" className={styles.sectionTitle}>
+          Recent
+        </h2>
+        <Link to={paths.library()} className={styles.libraryLink}>
+          {documents.length > SHOWN ? `All ${documents.length} in your library` : 'Library'}
+        </Link>
+      </div>
       <ul className={styles.list}>
-        {documents.map((document) => (
+        {documents.slice(0, SHOWN).map((document) => (
           <li key={document.id} className={styles.item}>
             <Link to={paths.read(document.id)} className={styles.itemLink}>
               <span className={styles.itemTitle}>{document.title}</span>
               <span className={styles.itemMeta}>
-                {progressLabel(document.progress.fraction)} · {formatCount(document.wordCount)}{' '}
+                {describeProgress(document.progress.fraction)} · {formatCount(document.wordCount)}{' '}
                 {document.wordCount === 1 ? 'word' : 'words'}
               </span>
             </Link>
-            <IconButton label={`Remove “${document.title}”`} onClick={() => onRemove(document)}>
-              <CloseIcon />
-            </IconButton>
           </li>
         ))}
       </ul>

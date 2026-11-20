@@ -2,7 +2,7 @@ import { useMemo, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { countWords } from '@/core';
 import { APP_NAME } from '@/lib/config';
-import type { DocumentMeta, NewDocument } from '@/lib/documents';
+import type { NewDocument } from '@/lib/documents';
 import { formatCount, formatReadingTime } from '@/lib/format';
 import { paths } from '@/lib/paths';
 import { useServices } from '@/lib/services';
@@ -11,8 +11,11 @@ import { StorageFullError } from '@/lib/storage';
 import { useAsync } from '@/lib/useAsync';
 import { Button } from '@/ui';
 import styles from './HomePage.module.css';
+import { ImportPanel } from './ImportPanel';
 import { RecentList } from './RecentList';
 import { SAMPLE_TEXT, SAMPLE_TITLE } from './sample';
+import { useFileDrop } from './useFileDrop';
+import { useImport } from './useImport';
 
 export function HomePage() {
   const { documents } = useServices();
@@ -21,6 +24,8 @@ export function HomePage() {
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const recent = useAsync(() => documents.list(), [documents]);
+  const imports = useImport(recent.reload);
+  const dragging = useFileDrop(imports.importFiles);
 
   const wordCount = useMemo(() => countWords(text), [text]);
 
@@ -61,11 +66,6 @@ export function HomePage() {
     else await open({ title: SAMPLE_TITLE, text: SAMPLE_TEXT, source: { kind: 'sample' } });
   }
 
-  async function remove(document: DocumentMeta) {
-    await documents.remove(document.id);
-    recent.reload();
-  }
-
   return (
     <div className={styles.page}>
       <title>{APP_NAME}</title>
@@ -73,8 +73,8 @@ export function HomePage() {
       <header>
         <h1 className={styles.title}>Read faster, one word at a time.</h1>
         <p className={styles.lede}>
-          Paste any text. Words appear one by one at a fixed point, so your eyes stay still and your
-          pace stays steady.
+          Paste some text or open a book. Words appear one by one at a fixed point, so your eyes
+          stay still and your pace stays steady.
         </p>
       </header>
 
@@ -114,8 +114,21 @@ export function HomePage() {
         )}
       </form>
 
+      <ImportPanel
+        state={imports.state}
+        accept={imports.accept}
+        onFiles={(files) => void imports.importFiles(files)}
+        onLink={imports.importLink && ((address) => void imports.importLink?.(address))}
+      />
+
       {recent.status === 'ready' && recent.data.length > 0 && (
-        <RecentList documents={recent.data} onRemove={(document) => void remove(document)} />
+        <RecentList documents={recent.data} />
+      )}
+
+      {dragging && (
+        <div className={styles.dropTarget} aria-hidden="true">
+          <p>Drop to add to your library</p>
+        </div>
       )}
     </div>
   );

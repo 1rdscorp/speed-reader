@@ -4,5 +4,6 @@
  */
 export const paths = {
   home: () => '/',
+  library: () => '/library',
   read: (documentId: string) => `/read/${documentId}`,
 };

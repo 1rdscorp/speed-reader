@@ -1,5 +1,6 @@
 import { createContext, use } from 'react';
 import type { DocumentRepository } from '@/lib/documents';
+import type { TextImporter } from '@/lib/import';
 import type { SettingsStore } from '@/lib/settings';
 
 /**
@@ -10,6 +11,7 @@ import type { SettingsStore } from '@/lib/settings';
 export interface Services {
   documents: DocumentRepository;
   settings: SettingsStore;
+  importer: TextImporter;
 }
 
 export const ServicesContext = createContext<Services | null>(null);

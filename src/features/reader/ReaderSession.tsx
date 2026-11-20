@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import {
   WPM_STEP,
   buildTimeline,
@@ -14,7 +14,7 @@ import type { ReadingDocument } from '@/lib/documents';
 import { paths } from '@/lib/paths';
 import { useServices } from '@/lib/services';
 import { useSettings } from '@/lib/settings';
-import { ArrowLeftIcon, buttonClassName } from '@/ui';
+import { ArrowLeftIcon, IconButton } from '@/ui';
 import { Controls } from './components/Controls';
 import { Stage } from './components/Stage';
 import styles from './Reader.module.css';
@@ -30,6 +30,9 @@ export function ReaderSession({ document }: { document: ReadingDocument }) {
   const { settings } = useServices();
   const { wpm } = useSettings();
   const navigate = useNavigate();
+  // Go back to the page the reader was opened from (start page or library).
+  // A reader opened directly from a link has no such page, and closes to the start.
+  const openedInApp = useLocation().key !== 'default';
 
   const tokens = useMemo(() => tokenize(document.text), [document.text]);
   const timeline = useMemo(() => buildTimeline(tokens), [tokens]);
@@ -48,9 +51,9 @@ export function ReaderSession({ document }: { document: ReadingDocument }) {
       restart: () => player.seek(0),
       faster: () => settings.update({ wpm: settings.get().wpm + WPM_STEP }),
       slower: () => settings.update({ wpm: settings.get().wpm - WPM_STEP }),
-      exit: () => void navigate(paths.home()),
+      exit: () => void (openedInApp ? navigate(-1) : navigate(paths.home())),
     }),
-    [player, tokens, settings, navigate],
+    [player, tokens, settings, navigate, openedInApp],
   );
   useReaderShortcuts(actions);
 
@@ -65,14 +68,9 @@ export function ReaderSession({ document }: { document: ReadingDocument }) {
       <title>{`${document.title} · ${APP_NAME}`}</title>
 
       <header className={`${styles.topbar} ${styles.chrome}`}>
-        <Link
-          to={paths.home()}
-          className={buttonClassName('quiet', true)}
-          aria-label="Close reader"
-          title="Close reader"
-        >
+        <IconButton label="Close reader" onClick={actions.exit}>
           <ArrowLeftIcon />
-        </Link>
+        </IconButton>
         <h1 className={styles.title}>{document.title}</h1>
       </header>
 

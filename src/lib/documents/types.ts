@@ -1,5 +1,11 @@
-/** Where a text came from. Later stages add file and URL imports here. */
-export type DocumentSource = { kind: 'paste' } | { kind: 'sample' };
+export type FileFormat = 'txt' | 'md' | 'html' | 'epub' | 'pdf';
+
+/** Where a text came from. */
+export type DocumentSource =
+  | { kind: 'paste' }
+  | { kind: 'sample' }
+  | { kind: 'file'; name: string; format: FileFormat }
+  | { kind: 'url'; url: string };
 
 export interface ReadingProgress {
   /**
@@ -39,6 +45,8 @@ export interface DocumentRepository {
   list(): Promise<DocumentMeta[]>;
   get(id: string): Promise<ReadingDocument | undefined>;
   create(input: NewDocument): Promise<DocumentMeta>;
+  /** Does nothing if the document no longer exists, or if the title is blank. */
+  rename(id: string, title: string): Promise<void>;
   /** Does nothing if the document no longer exists. */
   saveProgress(id: string, progress: ReadingProgress): Promise<void>;
   remove(id: string): Promise<void>;

@@ -12,7 +12,7 @@ import { buildRoutes } from '@/app/routes';
 import { applyTheme } from '@/lib/settings';
 
 async function start() {
-  const services = createServices();
+  const services = await createServices();
   await services.settings.load();
   applyTheme(services.settings.get().theme);
   services.settings.subscribe(() => applyTheme(services.settings.get().theme));

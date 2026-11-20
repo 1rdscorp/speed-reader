@@ -77,10 +77,96 @@
   font-size: var(--text-sm);
 }
 
-.recentTitle {
-  margin-bottom: var(--space-2);
+.sectionTitle {
   font-size: var(--text-md);
   font-weight: 700;
+}
+
+.import {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.importRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.hint {
+  flex: 1 1 16rem;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  text-wrap: pretty;
+}
+
+.linkField {
+  flex: 1 1 14rem;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  transition: border-color 120ms var(--ease);
+}
+
+.linkField::placeholder {
+  color: var(--ink-muted);
+}
+
+.linkField:focus-visible {
+  border-color: var(--ink);
+  outline-offset: 0;
+}
+
+.reading {
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.reading:empty {
+  display: none;
+}
+
+.summary a {
+  color: var(--ink);
+}
+
+/* Shown over the whole page while files are dragged across it. */
+.dropTarget {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  margin: var(--space-3);
+  border: 2px dashed var(--ink);
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--paper) 92%, transparent);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.recentHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.libraryLink {
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+@media (hover: hover) {
+  .libraryLink:hover {
+    color: var(--ink);
+  }
 }
 
 .list {

@@ -36,6 +36,26 @@ describe('document repository', () => {
     expect(meta.title).toBe('Named');
   });
 
+  it('tidies text before storing it', async () => {
+    const { repository } = setup();
+    const meta = await repository.create({
+      text: '\uFEFFFirst line\r\n\r\n\r\n\r\nA hy\u00ADphen\u00ADated word.  \r\n',
+      source: { kind: 'paste' },
+    });
+    expect((await repository.get(meta.id))?.text).toBe('First line\n\nA hyphenated word.');
+    expect(meta.wordCount).toBe(5);
+  });
+
+  it('renames a document, ignoring blank titles', async () => {
+    const { repository } = setup();
+    const meta = await repository.create({ text: 'body', title: 'Old', source: { kind: 'paste' } });
+    await repository.rename(meta.id, '  A   New Title ');
+    expect((await repository.list())[0]?.title).toBe('A New Title');
+    await repository.rename(meta.id, '   ');
+    expect((await repository.list())[0]?.title).toBe('A New Title');
+    await expect(repository.rename('missing', 'x')).resolves.toBeUndefined();
+  });
+
   it('lists documents most recently read first', async () => {
     const { repository } = setup();
     const first = await repository.create({ text: 'first', source: { kind: 'paste' } });

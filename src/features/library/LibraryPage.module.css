@@ -1,0 +1,194 @@
+.page {
+  width: min(100%, calc(var(--page-width) + 2 * var(--page-gutter)));
+  margin-inline: auto;
+  padding: var(--space-7) var(--page-gutter) var(--space-8);
+  display: grid;
+  gap: var(--space-5);
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+}
+
+.title {
+  font-size: var(--text-display);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.count {
+  color: var(--ink-muted);
+}
+
+.add {
+  margin-left: auto;
+  align-self: center;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.search {
+  position: relative;
+  flex: 1 1 14rem;
+  color: var(--ink-muted);
+}
+
+.search svg {
+  position: absolute;
+  top: 50%;
+  left: var(--space-4);
+  translate: 0 -50%;
+  pointer-events: none;
+}
+
+.field {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--ink);
+  transition: border-color 120ms var(--ease);
+}
+
+.field::placeholder {
+  color: var(--ink-muted);
+}
+
+.field:focus-visible {
+  border-color: var(--ink);
+  outline-offset: 0;
+}
+
+.search .field {
+  padding-left: calc(var(--space-4) + 20px + var(--space-2));
+}
+
+select.field {
+  width: auto;
+  padding-right: var(--space-3);
+  cursor: pointer;
+}
+
+.list {
+  border-top: 1px solid var(--hairline);
+}
+
+/* The rule under each row doubles as its progress bar. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: linear-gradient(
+      to right,
+      var(--ink) var(--progress, 0%),
+      var(--hairline) var(--progress, 0%)
+    )
+    bottom / 100% 1px no-repeat;
+}
+
+.rowLink {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3) 0;
+  text-decoration: none;
+}
+
+.rowTitle {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .rowLink:hover .rowTitle {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+}
+
+.rowMeta {
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+}
+
+.rename {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+}
+
+.rename .field {
+  flex: 1 1 12rem;
+  width: auto;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+}
+
+.empty {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding: var(--space-6) 0;
+  color: var(--ink-muted);
+}
+
+.empty strong {
+  color: var(--ink);
+  font-size: var(--text-lg);
+}
+
+/* Confirmation that floats above the page for as long as a removal can be undone. */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: max(var(--space-5), env(safe-area-inset-bottom));
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: calc(100vw - 2 * var(--page-gutter));
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
+  border-radius: var(--radius-full);
+  background: var(--ink);
+  color: var(--paper);
+  translate: -50% 0;
+}
+
+.toastText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toastAction {
+  min-height: 2.25rem;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--paper) 16%, transparent);
+  color: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toastAction:focus-visible {
+  outline-color: var(--paper);
+}
