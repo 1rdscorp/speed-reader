@@ -58,8 +58,9 @@ Reading:
   bar to any position.
 - Choose the size of the word, the color of its focus letter, and a dark
   reading area. The Settings page shows every setting with a live preview.
+- Make the reading area fill the screen, with a larger word.
 - Keyboard: `Space` play/pause · `←` `→` ten words · `Shift` + `←` `→` sentence ·
-  `↑` `↓` speed · `R` restart.
+  `↑` `↓` speed · `R` restart · `F` full screen.
 
 Getting text in:
 
@@ -70,6 +71,9 @@ Getting text in:
   paragraphs and their page numbers and running headers removed.
 - Files that cannot be read say why: scanned PDFs with no text, copy-protected
   books, unsupported formats.
+- Generate a practice text: pick a topic and a length, and the site puts one
+  together from its own bank of short passages (`src/lib/practice/bank.ts`).
+  It runs in the browser; no AI service is involved.
 - Paste a link to an article, where the site is deployed with the page endpoint.
 
 Keeping it:
@@ -116,6 +120,8 @@ src/
                the Services and FeatureModule contracts, URL builders, helpers.
     import/      Files and pages in, plain text out. One reader per format,
                  each loaded only when first needed.
+    practice/    Practice texts: a bank of short passages and the generator
+                 that assembles them by topic and length.
   ui/          Shared presentational components: buttons, icons, logo, and the
                word stage with its focus marks.
   features/    One folder per feature, each a self-contained slice.

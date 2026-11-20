@@ -14,6 +14,53 @@
   font-variant-numeric: tabular-nums;
 }
 
+.metaEnd {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Small enough to sit in the line of text without making the row taller. */
+.expand {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: -0.625rem -0.5rem -0.625rem 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .expand:hover {
+    color: var(--ink);
+  }
+}
+
+/*
+ * Full screen. The browser's own full screen sizes the card to the display;
+ * where that is unavailable these rules stretch it over the window instead.
+ */
+.card[data-fullscreen] {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  justify-content: space-between;
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 0;
+  border-radius: 0;
+  overflow-y: auto;
+}
+
+.card[data-fullscreen] .stageArea {
+  flex: 1;
+  display: grid;
+  align-content: center;
+}
+
 .stageArea {
   cursor: pointer;
   user-select: none;

@@ -57,6 +57,18 @@ export const ForwardIcon = () => (
   </Icon>
 );
 
+export const ExpandIcon = () => (
+  <Icon size={20}>
+    <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+  </Icon>
+);
+
+export const CollapseIcon = () => (
+  <Icon size={20}>
+    <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+  </Icon>
+);
+
 export const ArrowRightIcon = () => (
   <Icon size={18}>
     <path d="M5 12h14M13 6l6 6-6 6" />

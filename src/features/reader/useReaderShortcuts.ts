@@ -10,6 +10,8 @@ export interface ReaderActions {
   faster: () => void;
   slower: () => void;
   restart: () => void;
+  /** Enter or leave full screen. */
+  fullscreen: () => void;
 }
 
 const KEYS: Record<string, keyof ReaderActions> = {
@@ -22,6 +24,7 @@ const KEYS: Record<string, keyof ReaderActions> = {
   ArrowUp: 'faster',
   ArrowDown: 'slower',
   r: 'restart',
+  f: 'fullscreen',
 };
 
 /** True when the key should be left to the focused control instead. */

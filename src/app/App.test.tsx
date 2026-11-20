@@ -131,6 +131,29 @@ describe('adding text', () => {
     expect(await services.documents.list()).toHaveLength(1);
   });
 
+  it('generates a practice text on the chosen topic and length', async () => {
+    const { user, services } = renderApp('/read');
+
+    await user.selectOptions(await screen.findByLabelText('Topic'), 'History');
+    await user.selectOptions(screen.getByLabelText('Length'), 'Short · about 150 words');
+    await user.click(screen.getByRole('button', { name: 'Generate text' }));
+
+    const title = await screen.findByRole('heading', { level: 1, name: / and 1 more$/ });
+    const [saved] = await services.documents.list();
+    expect(saved).toMatchObject({
+      title: title.textContent,
+      source: { kind: 'generated', topic: 'history' },
+    });
+    expect(saved!.wordCount).toBeGreaterThan(100);
+    expect(saved!.wordCount).toBeLessThan(220);
+    // The text opens on the heading of its first passage.
+    expect(saved!.title.startsWith(stageWord() ?? '?')).toBe(true);
+
+    // A second one is a new text, not a replacement.
+    await user.click(screen.getByRole('button', { name: 'Generate text' }));
+    await waitFor(async () => expect(await services.documents.list()).toHaveLength(2));
+  });
+
   it('offers link import only when there is a way to fetch pages', async () => {
     const first = renderApp('/read');
     await screen.findByLabelText('Files to add');
@@ -222,6 +245,30 @@ describe('reader', () => {
     expect(stageWord()).toBe('One');
     await user.click(screen.getByRole('button', { name: 'Play' }));
     expect(screen.getByRole('button', { name: 'Pause' })).toBeTruthy();
+  });
+
+  it('fills the screen on request, and gives it back', async () => {
+    const { services, documents } = await seeded({ text: STORY });
+    const { user } = renderApp(`/read/${documents[0]!.id}`, services);
+    const card = () =>
+      screen.getByTestId('stage-word').closest('[style*="--focus-letter"]') as HTMLElement;
+
+    await user.click(await screen.findByRole('button', { name: 'Full screen' }));
+    expect(card().hasAttribute('data-fullscreen')).toBe(true);
+    // With the controls out of sight, the reading area says what speed it is set to.
+    expect(screen.getByText(/Word 1 of 20 · 300 WPM/)).toBeTruthy();
+    // Everything still works from the keyboard.
+    await user.keyboard('{ArrowUp}{ArrowRight}');
+    expect(screen.getByText(/Word 11 of 20 · 325 WPM/)).toBeTruthy();
+
+    await user.click(screen.getByRole('button', { name: 'Exit full screen' }));
+    expect(card().hasAttribute('data-fullscreen')).toBe(false);
+
+    await user.keyboard('f');
+    expect(card().hasAttribute('data-fullscreen')).toBe(true);
+    await user.keyboard('{Escape}');
+    expect(card().hasAttribute('data-fullscreen')).toBe(false);
+    expect(document.documentElement.style.overflow).toBe('');
   });
 
   it('shows several words at a time, keeping your place when the setting changes', async () => {

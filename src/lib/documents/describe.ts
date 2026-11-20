@@ -22,6 +22,8 @@ export function describeSource(source: DocumentSource): string {
       return 'Pasted';
     case 'sample':
       return 'Sample';
+    case 'generated':
+      return 'Generated';
     case 'file':
       return FORMAT_NAMES[source.format];
     case 'url':

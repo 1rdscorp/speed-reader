@@ -47,7 +47,10 @@ export function ControlsPanel() {
         <span className={styles.together}>
           <kbd>↑</kbd> <kbd>↓</kbd> speed
         </span>{' '}
-        · <kbd>R</kbd> restart
+        · <kbd>R</kbd> restart ·{' '}
+        <span className={styles.together}>
+          <kbd>F</kbd> full screen
+        </span>
       </p>
       <Link to={paths.settings()} className={styles.more}>
         All settings

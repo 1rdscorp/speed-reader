@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   DEFAULT_PAUSES,
   NO_PAUSES,
@@ -17,6 +17,7 @@ import { useSettings } from '@/lib/settings';
 import { usePlayback } from '@/lib/usePlayback';
 import { ReaderCard, SKIP_WORDS } from './components/ReaderCard';
 import styles from './Reader.module.css';
+import { useFullscreen } from './useFullscreen';
 import { useProgressSync } from './useProgressSync';
 import { useReaderShortcuts, type ReaderActions } from './useReaderShortcuts';
 
@@ -42,6 +43,9 @@ export function ReaderSession({ document }: { document: ReadingDocument }) {
 
   useProgressSync(document.id, document.text.length, tokens, frames, player);
 
+  const cardRef = useRef<HTMLDivElement>(null);
+  const fullscreen = useFullscreen(cardRef);
+
   const actions = useMemo<ReaderActions>(() => {
     const current = () => frames[player.getSnapshot().index]?.first ?? 0;
     const seekToken = (token: number) => {
@@ -57,8 +61,9 @@ export function ReaderSession({ document }: { document: ReadingDocument }) {
       restart: () => player.seek(0),
       faster: () => settings.update({ wpm: settings.get().wpm + WPM_STEP }),
       slower: () => settings.update({ wpm: settings.get().wpm - WPM_STEP }),
+      fullscreen: fullscreen.toggle,
     };
-  }, [player, tokens, frames, settings]);
+  }, [player, tokens, frames, settings, fullscreen.toggle]);
   useReaderShortcuts(actions);
 
   const wordNumber = (frame?.first ?? 0) + 1;
@@ -82,6 +87,9 @@ export function ReaderSession({ document }: { document: ReadingDocument }) {
         fontSize={fontSize}
         dark={darkReader}
         focusColor={focusColor}
+        wpm={wpm}
+        cardRef={cardRef}
+        fullscreen={fullscreen.active}
         actions={actions}
         onSeek={(step) => player.seek(step)}
       />

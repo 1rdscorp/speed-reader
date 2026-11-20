@@ -1,7 +1,9 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties, RefObject } from 'react';
 import type { PivotSplit, PlayerStatus } from '@/core';
 import { formatClock, formatCount } from '@/lib/format';
 import {
+  CollapseIcon,
+  ExpandIcon,
   ForwardIcon,
   PauseIcon,
   PlayIcon,
@@ -17,6 +19,9 @@ import styles from './ReaderCard.module.css';
 /** How many words the skip buttons and arrow keys move. */
 export const SKIP_WORDS = 10;
 
+/** In full screen there is room for a bigger word than the size chosen for the page. */
+const FULLSCREEN_SCALE = 1.6;
+
 interface ReaderCardProps {
   split: PivotSplit;
   status: PlayerStatus;
@@ -31,6 +36,10 @@ interface ReaderCardProps {
   dark: boolean;
   /** Name of the focus colour in use. */
   focusColor: string;
+  wpm: number;
+  /** The card's own element, so it can be shown full screen. */
+  cardRef: RefObject<HTMLDivElement | null>;
+  fullscreen: boolean;
   actions: ReaderActions;
   onSeek: (step: number) => void;
 }
@@ -47,6 +56,9 @@ export function ReaderCard({
   fontSize,
   dark,
   focusColor,
+  wpm,
+  cardRef,
+  fullscreen,
   actions,
   onSeek,
 }: ReaderCardProps) {
@@ -56,20 +68,40 @@ export function ReaderCard({
 
   return (
     <ReadingSurface
+      ref={cardRef}
       className={styles.card}
       dark={dark}
       focus={focusColor}
+      data-fullscreen={fullscreen || undefined}
       onClick={releaseFocusAfterPointer}
     >
       <div className={styles.meta}>
         <span>
           Word {formatCount(wordNumber)} of {formatCount(wordTotal)}
+          {/* The speed control is out of sight in full screen, so say what it is set to. */}
+          {fullscreen && ` · ${wpm} WPM`}
         </span>
-        <span>{formatClock(status === 'finished' ? 0 : remainingMs)} left</span>
+        <span className={styles.metaEnd}>
+          {formatClock(status === 'finished' ? 0 : remainingMs)} left
+          <button
+            type="button"
+            className={styles.expand}
+            aria-label={fullscreen ? 'Exit full screen' : 'Full screen'}
+            title={fullscreen ? 'Exit full screen (F)' : 'Full screen (F)'}
+            aria-pressed={fullscreen}
+            onClick={actions.fullscreen}
+          >
+            {fullscreen ? <CollapseIcon /> : <ExpandIcon />}
+          </button>
+        </span>
       </div>
 
       <div className={styles.stageArea} onClick={actions.toggle}>
-        <WordStage split={split} fontSize={fontSize} height={200} />
+        <WordStage
+          split={split}
+          fontSize={fullscreen ? fontSize * FULLSCREEN_SCALE : fontSize}
+          height={fullscreen ? 'min(46dvh, 26rem)' : 200}
+        />
       </div>
 
       <input

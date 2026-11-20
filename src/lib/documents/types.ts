@@ -5,7 +5,9 @@ export type DocumentSource =
   | { kind: 'paste' }
   | { kind: 'sample' }
   | { kind: 'file'; name: string; format: FileFormat }
-  | { kind: 'url'; url: string };
+  | { kind: 'url'; url: string }
+  /** A practice text put together by the site itself. */
+  | { kind: 'generated'; topic: string };
 
 export interface ReadingProgress {
   /**

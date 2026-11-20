@@ -7,8 +7,8 @@ interface WordStageProps {
   split: PivotSplit;
   /** Word size in CSS pixels. Text too wide for the stage is scaled down to fit. */
   fontSize: number;
-  /** Height of the stage in CSS pixels. */
-  height: number;
+  /** Height of the stage: CSS pixels, or any CSS length such as "40dvh". */
+  height: number | string;
 }
 
 /** Breathing room kept between the text and the edges of the stage. */

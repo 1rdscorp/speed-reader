@@ -3,15 +3,37 @@ import { Link, useNavigate } from 'react-router';
 import { countWords } from '@/core';
 import { formatCount, formatReadingTime } from '@/lib/format';
 import { paths } from '@/lib/paths';
+import {
+  PRACTICE_LENGTHS,
+  PRACTICE_TOPICS,
+  generatePracticeText,
+  type PracticeLength,
+  type PracticeTopicChoice,
+} from '@/lib/practice';
 import { useServices } from '@/lib/services';
 import { useSettings } from '@/lib/settings';
 import { StorageFullError } from '@/lib/storage';
-import { Button, FileIcon } from '@/ui';
+import { Button, FileIcon, SelectField } from '@/ui';
 import { useFileDrop } from '../useFileDrop';
 import { useImport } from '../useImport';
 import styles from './AddText.module.css';
 
-/** Where new text comes in: pasted, opened from files, or fetched from a link where supported. */
+const TOPIC_CHOICES: Array<{ value: PracticeTopicChoice; label: string }> = [
+  { value: 'mixed', label: 'A mix of topics' },
+  ...PRACTICE_TOPICS.map((topic) => ({ value: topic.id, label: topic.label })),
+];
+const LENGTH_CHOICES = PRACTICE_LENGTHS.map((length) => ({
+  value: length.id,
+  label: `${length.label} · about ${length.words} words`,
+}));
+
+const SAVE_FAILED =
+  'That text could not be saved. Check that this site is allowed to store data, then try again.';
+
+/**
+ * Where new text comes in: pasted, opened from files, generated for practice,
+ * or fetched from a link where supported.
+ */
 export function AddText() {
   const { documents } = useServices();
   const { wpm } = useSettings();
@@ -22,6 +44,8 @@ export function AddText() {
   const [text, setText] = useState('');
   const [address, setAddress] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [topic, setTopic] = useState<PracticeTopicChoice>('mixed');
+  const [length, setLength] = useState<PracticeLength>('medium');
 
   const wordCount = useMemo(() => countWords(text), [text]);
   const busy = imports.state.reading !== null;
@@ -37,7 +61,7 @@ export function AddText() {
       setError(
         cause instanceof StorageFullError
           ? 'There is not enough room in this browser to save that text. Remove something from your library or try a shorter text.'
-          : 'That text could not be saved. Check that this site is allowed to store data, then try again.',
+          : SAVE_FAILED,
       );
     }
   }
@@ -51,6 +75,17 @@ export function AddText() {
     if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
       event.preventDefault();
       void readPasted();
+    }
+  }
+
+  async function generate(event: FormEvent) {
+    event.preventDefault();
+    setError(null);
+    try {
+      const created = await documents.create(await generatePracticeText({ topic, length }));
+      await navigate(paths.read(created.id));
+    } catch {
+      setError(SAVE_FAILED);
     }
   }
 
@@ -108,6 +143,33 @@ export function AddText() {
             Text, Markdown, saved web pages, EPUB and PDF. You can also drop files anywhere on this
             page.
           </p>
+        </div>
+      </form>
+
+      <form className={styles.generate} onSubmit={(event) => void generate(event)}>
+        <div>
+          <h2 className={styles.label}>Nothing to hand? Generate a practice text</h2>
+          <p className={styles.hint}>
+            Short reads on the topic you pick, put together in your browser. Each one is saved to
+            your library like any other text.
+          </p>
+        </div>
+        <div className={styles.generateFields}>
+          <SelectField
+            id="practice-topic"
+            label="Topic"
+            value={topic}
+            options={TOPIC_CHOICES}
+            onChange={setTopic}
+          />
+          <SelectField
+            id="practice-length"
+            label="Length"
+            value={length}
+            options={LENGTH_CHOICES}
+            onChange={setLength}
+          />
+          <Button type="submit">Generate text</Button>
         </div>
       </form>
 
