@@ -20,11 +20,10 @@ export function buildRoutes(features: FeatureModule[] = FEATURES): RouteObject[]
         {
           element: <AppShell navItems={navItems} />,
           children: [
-            ...features.flatMap((feature) => feature.routes ?? []),
+            ...features.flatMap((feature) => feature.routes),
             { path: '*', element: <NotFoundPage /> },
           ],
         },
-        ...features.flatMap((feature) => feature.fullscreenRoutes ?? []),
       ],
     },
   ];

@@ -1,6 +1,6 @@
 import type { FeatureModule } from '@/lib/feature';
 
-/** The start page: paste a text, or pick up a recent one. */
+/** The front page: what the site is, how it works, and the tools on it. */
 export const homeFeature: FeatureModule = {
   id: 'home',
   routes: [

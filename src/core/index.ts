@@ -1,10 +1,11 @@
 /**
- * The reading engine: text in, paced tokens out. Framework-free by design
+ * The reading engine: text in, paced frames out. Framework-free by design
  * (enforced by the linter) so it can be tested, reused and reasoned about alone.
  */
+export { MAX_WORDS_PER_FRAME, buildFrames, frameIndexOf, splitFrame, type Frame } from './frames';
 export { graphemes } from './graphemes';
 export { nextSentence, previousSentence, sentenceStart, indexAtOffset } from './navigation';
-export { splitAtPivot, type PivotSplit } from './orp';
+export { splitAtCentre, splitAtPivot, type PivotSplit } from './orp';
 export {
   Player,
   type PlayerOptions,
@@ -17,6 +18,7 @@ export {
   DEFAULT_WPM,
   MAX_WPM,
   MIN_WPM,
+  NO_PAUSES,
   WPM_STEP,
   buildTimeline,
   clampWpm,

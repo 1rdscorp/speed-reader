@@ -1,44 +1,76 @@
 .shell {
   min-height: 100dvh;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
+}
+
+.header,
+.footer {
+  background: var(--surface);
 }
 
 .header {
+  border-bottom: 1px solid var(--line);
+}
+
+.footer {
+  border-top: 1px solid var(--line);
+}
+
+.bar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-5);
-  width: min(100%, calc(var(--page-width) + 2 * var(--page-gutter)));
-  margin-inline: auto;
-  padding: var(--space-3) var(--page-gutter);
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding-block: var(--space-4);
 }
 
 .home {
-  margin-right: auto;
   text-decoration: none;
 }
 
 .nav {
   display: flex;
-  gap: var(--space-4);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  /* Line the first link's text up with the page edge when the nav wraps under the logo. */
+  margin-inline: -14px;
 }
 
-.navLink {
-  color: var(--ink-muted);
-  font-weight: 600;
+.navLink,
+.navLink:hover {
+  padding: var(--space-3) 14px;
+  color: var(--ink);
+  font-weight: 500;
   text-decoration: none;
 }
 
-.navLink:hover,
 .navLink[aria-current='page'] {
-  color: var(--ink);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+@media (hover: hover) {
+  .navLink:hover {
+    color: var(--accent);
+  }
+}
+
+.footerBar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block: 1.75rem;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
 }
 
 /* Shared by the shell's own pages: not-found and error. */
 .message {
-  width: min(100%, calc(var(--page-width) + 2 * var(--page-gutter)));
-  margin-inline: auto;
-  padding: var(--space-8) var(--page-gutter);
+  padding-block: var(--space-8);
   display: grid;
   gap: var(--space-4);
   justify-items: start;
@@ -46,10 +78,11 @@
 }
 
 .message h1 {
-  font-size: var(--text-xl);
-  line-height: 1.2;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: 1.15;
 }
 
 .message p {
-  color: var(--ink-muted);
+  color: var(--ink-soft);
 }

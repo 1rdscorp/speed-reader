@@ -3,21 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#ffffff" />
     <meta
       name="description"
-      content="Read faster, one word at a time. Paste any text and read it at a steady pace, with your eyes held still."
+      content="A free speed reading trainer. Paste any text or open a book and read it one word at a time, at the speed you choose."
     />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <title>Speed Reader</title>
-    <script>
-      // Apply a saved theme before the first paint so the page never flashes the wrong one.
-      // Mirrors applyTheme() in src/lib/settings/theme.ts.
-      try {
-        var theme = JSON.parse(localStorage.getItem('speed-reader:settings')).theme;
-        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
-      } catch (e) {}
-    </script>
   </head>
   <body>
     <div id="root"></div>

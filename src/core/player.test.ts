@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Player, type Scheduler } from './player';
-import { buildTimeline } from './timing';
+import { buildFrames } from './frames';
+import { NO_PAUSES, buildTimeline } from './timing';
 import { tokenize } from './tokenize';
 
 /** A hand-cranked clock: time only moves when the test says so. */
@@ -157,6 +158,36 @@ describe('Player', () => {
     unsubscribe();
     scheduler.advance(100);
     expect(listener).toHaveBeenCalledTimes(2);
+  });
+
+  it('carries on from the matching place when the text is regrouped mid-play', () => {
+    const { player, scheduler } = setup('aa bb cc dd ee ff gg hh', 600);
+    const tokens = tokenize('aa bb cc dd ee ff gg hh');
+    const pairs = buildTimeline(tokens, NO_PAUSES, buildFrames(tokens, 2));
+    const listener = vi.fn();
+    player.subscribe(listener);
+
+    player.play();
+    scheduler.advance(250); // on the third word
+    listener.mockClear();
+    player.retime(pairs, 1); // the pair that holds it
+    expect(player.getSnapshot()).toEqual({ index: 1, status: 'playing' });
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    scheduler.advance(199); // a pair lasts as long as two words
+    expect(player.getSnapshot().index).toBe(1);
+    scheduler.advance(1);
+    expect(player.getSnapshot().index).toBe(2);
+  });
+
+  it('stays paused, and inside the text, when regrouped while paused', () => {
+    const { player } = setup('aa bb cc dd ee ff', 600);
+    const tokens = tokenize('aa bb cc dd ee ff');
+    const triples = buildTimeline(tokens, undefined, buildFrames(tokens, 3));
+    player.seek(5);
+    player.retime(triples, 99);
+    expect(player.getSnapshot()).toEqual({ index: 1, status: 'paused' });
+    expect(player.length).toBe(2);
   });
 
   it('is inert for an empty text', () => {

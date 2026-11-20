@@ -40,7 +40,9 @@ export function DocumentRow({ document, wpm, onRename, onRemove }: DocumentRowPr
   return (
     <li
       className={styles.row}
-      style={{ '--progress': `${Math.round(document.progress.fraction * 100)}%` } as CSSProperties}
+      style={
+        { '--progress-at': `${Math.round(document.progress.fraction * 100)}%` } as CSSProperties
+      }
     >
       {renaming ? (
         <form

@@ -4,8 +4,9 @@ A website for reading faster. Text is shown one word at a time at a fixed point
 on the screen, with one letter of each word highlighted as the place to rest
 your eyes, so reading speed is set by a dial instead of by eye movement.
 
-It is being built in stages. **Stages 1 and 2 are done** (the reader, then the
-library and importing); the plan for the rest is [below](#stages).
+It is being built in stages, to the design in the "Speed Reader – site mockup".
+**The reader is done**, along with a library and file import; the plan for the
+rest is [below](#stages).
 
 ## Running it
 
@@ -49,17 +50,20 @@ switched off. Everything else works there.
 
 Reading:
 
-- Read any text one word at a time, from 100 to 1000 words per minute.
+- Read any text one word at a time, from 100 to 1000 words per minute, or two
+  or three words at a time.
 - The speed shown is the true average: pauses after commas, sentences and
-  paragraphs are built in, not added on top.
-- Play, pause, jump back or forward a sentence, scrub to any position.
-- Keyboard: `Space` play/pause · `←` `→` sentence · `↑` `↓` speed · `R` restart · `Esc` close.
-- Light and dark themes, following the system until you choose.
+  paragraphs are built in, not added on top. They can be switched off.
+- Play, pause, skip back or forward ten words, restart, or drag the progress
+  bar to any position.
+- Choose the size of the word, and a dark reading area.
+- Keyboard: `Space` play/pause · `←` `→` ten words · `Shift` + `←` `→` sentence ·
+  `↑` `↓` speed · `R` restart.
 
 Getting text in:
 
 - Paste it, or open files: plain text, Markdown, saved web pages, EPUB and PDF.
-  Choose them or drop them anywhere on the start page, several at once if you like.
+  Choose them or drop them anywhere on the Read page, several at once if you like.
 - Web pages are reduced to the article (the same extraction as Firefox's Reader
   View). EPUBs are read in chapter order. PDFs have their lines rejoined into
   paragraphs and their page numbers and running headers removed.
@@ -105,17 +109,18 @@ limits, and responses the browser can never render).
 ```
 src/
   core/        The reading engine. Pure TypeScript: no React, no DOM.
-               tokenize → timeline (pacing) → Player (playback), plus pivot and
-               sentence navigation.
+               tokenize → frames (words shown together) → timeline (pacing) →
+               Player (playback), plus the focus letter and sentence navigation.
   lib/         Shared building blocks: storage, documents, import, settings,
                the Services and FeatureModule contracts, URL builders, helpers.
     import/      Files and pages in, plain text out. One reader per format,
                  each loaded only when first needed.
-  ui/          Shared presentational components: buttons, icons, wordmark.
+  ui/          Shared presentational components: buttons, icons, logo, and the
+               word stage with its focus marks.
   features/    One folder per feature, each a self-contained slice.
-    home/        Start page: paste, open files, add a link, recent texts.
+    home/        The front page: introduction, how it works, the tools.
+    reader/      The Read page: the reading area, its controls, adding text.
     library/     Everything saved: search, sort, rename, remove.
-    reader/      The reading screen.
   app/         Composition: feature registry, routes, shell, service wiring.
   styles/      Design tokens and base styles.
   test/        Test setup and a helper that renders the whole app in memory.
@@ -131,9 +136,9 @@ each other or `app`. Inside `src`, imports are written `@/…`.
 The seams that let later stages slot in:
 
 - **Feature registry** — `src/app/features.ts` lists every feature. A feature
-  exports a `FeatureModule` (`src/lib/feature.ts`): its routes, whether they
-  sit inside the app shell or take the full screen, and an optional navigation
-  entry. Routes and navigation are assembled from the list.
+  exports a `FeatureModule` (`src/lib/feature.ts`): its routes and an optional
+  navigation entry. Routes and the header navigation are assembled from the
+  list, so a new stage's page appears in the menu by being added to it.
 - **Services** — `src/lib/services.ts` defines what the app depends on
   (documents, settings, importer). Components get them from `useServices()`;
   `src/app/createServices.ts` is the single place that picks implementations.
@@ -152,7 +157,7 @@ The seams that let later stages slot in:
   values are merged over defaults, so new settings need no migration.
 - **Engine** — the `Player` emits snapshots and knows nothing about the UI.
   Statistics, training modes or a different display can subscribe to it.
-- **Design tokens** — colours, type and spacing live in
+- **Design tokens** — the mockup's colours, type and spacing live in
   `src/styles/tokens.css`; components never hard-code them.
 
 ### Adding a feature
@@ -166,16 +171,19 @@ The seams that let later stages slot in:
 
 ## Stages
 
-1. **Core reader** — done.
-2. **Library and import** — done. One part is waiting on a decision: link
-   import works locally but is off in production builds until the site has a
-   host that can run the page endpoint (see
-   [Importing from a link](#importing-from-a-link)).
-3. **Reading preferences** — a settings page: font and size, pause lengths,
-   several words at a time, a view of the surrounding text when paused.
-4. **Progress and statistics** — reading sessions, words read, speed over time.
-5. **Training** — guided speed ramps and comprehension checks.
-6. **Offline and sync** — installable app that works offline; optional
-   accounts to sync the library across devices.
+The plan follows the tool cards on the front page.
 
-The order and contents of stages 3–6 are a proposal, not a commitment.
+1. **RSVP Reader** — done. One word at a time with speed, pause and rewind.
+2. **Reading settings** — partly there: font size, the dark reading area, words
+   at a time and punctuation pauses are in the reader's Controls and are saved
+   in the browser. Still to come: the focus-letter colour and a Settings page.
+3. **Training drills** — word chunking, a pacer line and peripheral-vision
+   exercises.
+4. **Speed test and progress** — measure WPM with a short quiz and keep a
+   history.
+
+Also built, outside that list: the library and file import. Link import works
+locally but is off on the published site, because GitHub Pages cannot run the
+page endpoint (see [Importing from a link](#importing-from-a-link)).
+
+Memory exercises are deliberately not part of the plan.

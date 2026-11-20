@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { Player, Token } from '@/core';
+import type { Frame, Player, Token } from '@/core';
 import { useServices } from '@/lib/services';
 
 /** While playing, the position is saved at most this often. */
@@ -12,8 +12,9 @@ const SAVE_INTERVAL_MS = 5_000;
  */
 export function useProgressSync(
   documentId: string,
-  tokens: readonly Token[],
   textLength: number,
+  tokens: readonly Token[],
+  frames: readonly Frame[],
   player: Player,
 ): void {
   const { documents } = useServices();
@@ -24,14 +25,15 @@ export function useProgressSync(
 
     const save = () => {
       const { index, status } = player.getSnapshot();
-      const token = tokens[index];
-      if (!token) return;
+      const frame = frames[index];
+      const token = frame && tokens[frame.first];
+      if (!frame || !token) return;
       const finished = status === 'finished';
       lastSavedAt = Date.now();
       documents
         .saveProgress(documentId, {
           offset: finished ? textLength : token.start,
-          fraction: finished ? 1 : index / tokens.length,
+          fraction: finished ? 1 : frame.first / tokens.length,
         })
         // Losing a position save is not worth interrupting reading for.
         .catch(() => {});
@@ -55,5 +57,5 @@ export function useProgressSync(
       document.removeEventListener('visibilitychange', handleVisibility);
       save();
     };
-  }, [documents, documentId, tokens, textLength, player]);
+  }, [documents, documentId, textLength, tokens, frames, player]);
 }

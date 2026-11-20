@@ -1,9 +1,7 @@
 .page {
-  width: min(100%, calc(var(--page-width) + 2 * var(--page-gutter)));
-  margin-inline: auto;
-  padding: var(--space-7) var(--page-gutter) var(--space-8);
   display: grid;
   gap: var(--space-5);
+  padding-block: var(--space-6) var(--space-7);
 }
 
 .header {
@@ -14,10 +12,9 @@
 }
 
 .title {
-  font-size: var(--text-display);
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.025em;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  line-height: 1.15;
 }
 
 .count {
@@ -44,17 +41,17 @@
 .search svg {
   position: absolute;
   top: 50%;
-  left: var(--space-4);
+  left: var(--space-3);
   translate: 0 -50%;
   pointer-events: none;
 }
 
 .field {
   width: 100%;
-  min-height: 2.75rem;
-  padding: 0 var(--space-4);
-  border: 1px solid var(--outline);
-  border-radius: var(--radius-full);
+  min-height: 3rem;
+  padding: 0 var(--space-3);
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
   transition: border-color 120ms var(--ease);
@@ -65,22 +62,28 @@
 }
 
 .field:focus-visible {
-  border-color: var(--ink);
+  border-color: var(--accent);
   outline-offset: 0;
 }
 
 .search .field {
-  padding-left: calc(var(--space-4) + 20px + var(--space-2));
+  padding-left: calc(var(--space-3) + 20px + var(--space-2));
 }
 
 select.field {
   width: auto;
-  padding-right: var(--space-3);
   cursor: pointer;
 }
 
+.list,
+.empty {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
 .list {
-  border-top: 1px solid var(--hairline);
+  overflow: hidden;
 }
 
 /* The rule under each row doubles as its progress bar. */
@@ -88,20 +91,28 @@ select.field {
   display: flex;
   align-items: center;
   gap: var(--space-1);
+  padding: 0 var(--space-3) 0 1.25rem;
   background: linear-gradient(
       to right,
-      var(--ink) var(--progress, 0%),
-      var(--hairline) var(--progress, 0%)
+      var(--progress) var(--progress-at, 0%),
+      var(--line) var(--progress-at, 0%)
     )
-    bottom / 100% 1px no-repeat;
+    bottom / 100% 2px no-repeat;
 }
 
-.rowLink {
+.row:last-child {
+  background-size: var(--progress-at, 0%) 2px;
+  background-image: linear-gradient(var(--progress), var(--progress));
+}
+
+.rowLink,
+.rowLink:hover {
   flex: 1;
   min-width: 0;
   display: grid;
   gap: 2px;
-  padding: var(--space-3) 0;
+  padding: var(--space-4) 0;
+  color: var(--ink);
   text-decoration: none;
 }
 
@@ -114,9 +125,7 @@ select.field {
 
 @media (hover: hover) {
   .rowLink:hover .rowTitle {
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.2em;
+    color: var(--accent);
   }
 }
 
@@ -131,27 +140,27 @@ select.field {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
-  padding: var(--space-2) 0;
+  padding: var(--space-3) 0;
 }
 
 .rename .field {
   flex: 1 1 12rem;
   width: auto;
-  border-radius: var(--radius-md);
   font-weight: 600;
 }
 
 .empty {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-2);
   justify-items: start;
-  padding: var(--space-6) 0;
-  color: var(--ink-muted);
+  padding: var(--space-6) var(--space-5);
+  color: var(--ink-soft);
 }
 
 .empty strong {
   color: var(--ink);
-  font-size: var(--text-lg);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
 }
 
 /* Confirmation that floats above the page for as long as a removal can be undone. */
@@ -164,10 +173,11 @@ select.field {
   align-items: center;
   gap: var(--space-3);
   max-width: calc(100vw - 2 * var(--page-gutter));
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-5);
-  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-2) var(--space-2) 1.25rem;
+  border-radius: var(--radius-sm);
   background: var(--ink);
-  color: var(--paper);
+  color: #ffffff;
+  box-shadow: var(--shadow-card);
   translate: -50% 0;
 }
 
@@ -179,16 +189,16 @@ select.field {
 }
 
 .toastAction {
-  min-height: 2.25rem;
+  min-height: 2.5rem;
   padding: 0 var(--space-4);
   border: 0;
-  border-radius: var(--radius-full);
-  background: color-mix(in oklab, var(--paper) 16%, transparent);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 16%);
   color: inherit;
   font-weight: 600;
   cursor: pointer;
 }
 
 .toastAction:focus-visible {
-  outline-color: var(--paper);
+  outline-color: #ffffff;
 }

@@ -13,10 +13,8 @@ export interface NavItem {
  */
 export interface FeatureModule {
   id: string;
-  /** Pages rendered inside the app shell (header and navigation). */
-  routes?: RouteObject[];
-  /** Pages that take over the whole screen, such as the reader. */
-  fullscreenRoutes?: RouteObject[];
+  /** The feature's pages, rendered inside the app shell (header, navigation, footer). */
+  routes: RouteObject[];
   /** Entry in the main navigation, if the feature has a top-level page. */
   nav?: NavItem;
 }

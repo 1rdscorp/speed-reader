@@ -1,7 +1,6 @@
 import type { KeyValueStore } from '@/lib/storage';
 import { DEFAULT_SETTINGS, sanitize, type Settings } from './settings';
 
-/** Storage key. index.html reads the same entry to set the theme before first paint. */
 export const SETTINGS_KEY = 'settings';
 
 /**
@@ -36,8 +35,10 @@ export class SettingsStore {
   };
 
   update(patch: Partial<Settings>): void {
-    const next = sanitize({ ...this.#settings, ...patch });
-    if (next.wpm === this.#settings.wpm && next.theme === this.#settings.theme) return;
+    const current = this.#settings;
+    const next = sanitize({ ...current, ...patch });
+    const keys = Object.keys(next) as Array<keyof Settings>;
+    if (keys.every((key) => next[key] === current[key])) return;
     this.#settings = next;
     this.#notify();
     // A failed save only costs the preference on the next visit, so it must not interrupt reading.

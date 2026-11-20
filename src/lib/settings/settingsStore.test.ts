@@ -12,14 +12,20 @@ describe('SettingsStore', () => {
 
   it('merges saved values over defaults and repairs invalid ones', async () => {
     const store = createMemoryStore();
-    await store.set(SETTINGS_KEY, { wpm: 99_999, theme: 'neon', removedLongAgo: true });
+    await store.set(SETTINGS_KEY, {
+      wpm: 99_999,
+      wordsPerFrame: 12,
+      fontSize: 'huge',
+      darkReader: 'yes',
+      removedLongAgo: true,
+    });
     const settings = new SettingsStore(store);
     await settings.load();
-    expect(settings.get()).toEqual({ wpm: 1000, theme: 'system' });
+    expect(settings.get()).toEqual({ ...DEFAULT_SETTINGS, wpm: 1000, wordsPerFrame: 3 });
 
-    await store.set(SETTINGS_KEY, { theme: 'dark' });
+    await store.set(SETTINGS_KEY, { darkReader: true, fontSize: 72 });
     await settings.load();
-    expect(settings.get()).toEqual({ wpm: DEFAULT_SETTINGS.wpm, theme: 'dark' });
+    expect(settings.get()).toEqual({ ...DEFAULT_SETTINGS, darkReader: true, fontSize: 72 });
   });
 
   it('persists updates and notifies subscribers', async () => {
@@ -32,7 +38,7 @@ describe('SettingsStore', () => {
     settings.update({ wpm: 450 });
     expect(settings.get().wpm).toBe(450);
     expect(listener).toHaveBeenCalledTimes(1);
-    expect(await store.get(SETTINGS_KEY)).toEqual({ wpm: 450, theme: 'system' });
+    expect(await store.get(SETTINGS_KEY)).toEqual({ ...DEFAULT_SETTINGS, wpm: 450 });
 
     settings.update({ wpm: 450 });
     expect(listener).toHaveBeenCalledTimes(1);
@@ -45,7 +51,7 @@ describe('SettingsStore', () => {
       delete: () => Promise.reject(new Error('blocked')),
     });
     await settings.load();
-    settings.update({ theme: 'light' });
-    expect(settings.get()).toEqual({ ...DEFAULT_SETTINGS, theme: 'light' });
+    settings.update({ darkReader: true });
+    expect(settings.get()).toEqual({ ...DEFAULT_SETTINGS, darkReader: true });
   });
 });

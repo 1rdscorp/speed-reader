@@ -1,135 +1,158 @@
-import { useMemo, useState, type FormEvent, type KeyboardEvent } from 'react';
-import { useNavigate } from 'react-router';
-import { countWords } from '@/core';
+import type { ReactNode } from 'react';
+import { Link } from 'react-router';
 import { APP_NAME } from '@/lib/config';
-import type { NewDocument } from '@/lib/documents';
-import { formatCount, formatReadingTime } from '@/lib/format';
 import { paths } from '@/lib/paths';
-import { useServices } from '@/lib/services';
-import { useSettings } from '@/lib/settings';
-import { StorageFullError } from '@/lib/storage';
-import { useAsync } from '@/lib/useAsync';
-import { Button } from '@/ui';
+import {
+  ArrowRightIcon,
+  DrillsToolIcon,
+  ProgressToolIcon,
+  ReaderToolIcon,
+  SettingsToolIcon,
+  buttonClassName,
+} from '@/ui';
 import styles from './HomePage.module.css';
-import { ImportPanel } from './ImportPanel';
-import { RecentList } from './RecentList';
-import { SAMPLE_TEXT, SAMPLE_TITLE } from './sample';
-import { useFileDrop } from './useFileDrop';
-import { useImport } from './useImport';
+import { LivePreview } from './LivePreview';
+
+const STEPS = [
+  {
+    title: 'Paste your text',
+    text: 'An article, an email, a chapter – anything you want to get through.',
+  },
+  {
+    title: 'Pick a speed',
+    text: 'Start near your normal pace and raise the words per minute as you get comfortable.',
+  },
+  {
+    title: 'Keep your eyes still',
+    text: 'Words appear in one spot, lined up on the red focus letter, so your eyes don’t have to move.',
+  },
+];
+
+interface Tool {
+  icon: ReactNode;
+  stage: number;
+  title: string;
+  text: string;
+  /** Where the tool lives, once its stage is built. */
+  to?: string;
+}
+
+/** The site's tools, in the order they are being built. A tool with a link is ready to use. */
+const TOOLS: Tool[] = [
+  {
+    icon: <ReaderToolIcon />,
+    stage: 1,
+    title: 'RSVP Reader',
+    text: 'One word at a time with a speed slider, pause and rewind.',
+    to: paths.read(),
+  },
+  {
+    icon: <SettingsToolIcon />,
+    stage: 2,
+    title: 'Reading settings',
+    text: 'Font size, dark mode and focus-letter color, saved in your browser.',
+  },
+  {
+    icon: <DrillsToolIcon />,
+    stage: 3,
+    title: 'Training drills',
+    text: 'Word chunking, a pacer line and peripheral-vision exercises.',
+  },
+  {
+    icon: <ProgressToolIcon />,
+    stage: 4,
+    title: 'Speed test & progress',
+    text: 'Measure your WPM with a short quiz and see your history over time.',
+  },
+];
+
+function ToolCard({ tool }: { tool: Tool }) {
+  const content = (
+    <>
+      <div className={styles.toolTop}>
+        {tool.icon}
+        <span className={styles.chip} data-ready={tool.to ? '' : undefined}>
+          Stage {tool.stage}
+        </span>
+      </div>
+      <h3>{tool.title}</h3>
+      <p>{tool.text}</p>
+    </>
+  );
+  return tool.to ? (
+    <Link to={tool.to} className={styles.tool}>
+      {content}
+    </Link>
+  ) : (
+    <div className={styles.tool}>{content}</div>
+  );
+}
 
 export function HomePage() {
-  const { documents } = useServices();
-  const { wpm } = useSettings();
-  const navigate = useNavigate();
-  const [text, setText] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const recent = useAsync(() => documents.list(), [documents]);
-  const imports = useImport(recent.reload);
-  const dragging = useFileDrop(imports.importFiles);
-
-  const wordCount = useMemo(() => countWords(text), [text]);
-
-  async function open(input: NewDocument) {
-    setError(null);
-    try {
-      const created = await documents.create(input);
-      await navigate(paths.read(created.id));
-    } catch (cause) {
-      setError(
-        cause instanceof StorageFullError
-          ? 'There is not enough room in this browser to save that text. Remove a recent text or try a shorter one.'
-          : 'That text could not be saved. Check that this site is allowed to store data, then try again.',
-      );
-    }
-  }
-
-  function submit() {
-    if (wordCount > 0) void open({ text, source: { kind: 'paste' } });
-  }
-
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    submit();
-  }
-
-  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
-    if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-      event.preventDefault();
-      submit();
-    }
-  }
-
-  async function openSample() {
-    // Reuse the sample if it is already saved, so trying it twice keeps your place.
-    const existing = (await documents.list()).find((document) => document.source.kind === 'sample');
-    if (existing) await navigate(paths.read(existing.id));
-    else await open({ title: SAMPLE_TITLE, text: SAMPLE_TEXT, source: { kind: 'sample' } });
-  }
-
   return (
-    <div className={styles.page}>
+    <>
       <title>{APP_NAME}</title>
 
-      <header>
-        <h1 className={styles.title}>Read faster, one word at a time.</h1>
-        <p className={styles.lede}>
-          Paste some text or open a book. Words appear one by one at a fixed point, so your eyes
-          stay still and your pace stays steady.
-        </p>
-      </header>
-
-      <form className={styles.composer} onSubmit={handleSubmit}>
-        <label htmlFor="text-input" className="visuallyHidden">
-          Text to read
-        </label>
-        <textarea
-          id="text-input"
-          className={styles.textarea}
-          placeholder="Paste the text you want to read…"
-          value={text}
-          onChange={(event) => setText(event.target.value)}
-          onKeyDown={handleKeyDown}
-          spellCheck={false}
-          aria-describedby="text-summary"
-        />
-        <div className={styles.footer}>
-          <p id="text-summary" className={styles.summary}>
-            {wordCount === 0
-              ? `Reading at ${wpm} words per minute`
-              : `${formatCount(wordCount)} ${wordCount === 1 ? 'word' : 'words'} · ${formatReadingTime(wordCount, wpm)} at ${wpm} wpm`}
+      <section className={`container ${styles.hero}`}>
+        <div className={styles.heroText}>
+          <p className={styles.eyebrow}>Free speed reading trainer</p>
+          <h1 className={styles.headline}>
+            Read faster.
+            <br />
+            Stay focused.
+          </h1>
+          <p className={styles.lede}>
+            Paste any text or open a book, and read it one word at a time at the speed you choose.
           </p>
-          <div className={styles.actions}>
-            <Button variant="quiet" onClick={() => void openSample()}>
-              Try a sample
-            </Button>
-            <Button variant="primary" type="submit" disabled={wordCount === 0}>
+          <div className={styles.cta}>
+            <Link to={paths.read()} className={buttonClassName('primary')}>
               Start reading
-            </Button>
+              <ArrowRightIcon />
+            </Link>
+            <Link to={paths.library()} className={buttonClassName('secondary')}>
+              Open your library
+            </Link>
           </div>
         </div>
-        {error && (
-          <p role="alert" className={styles.error}>
-            {error}
-          </p>
-        )}
-      </form>
-
-      <ImportPanel
-        state={imports.state}
-        accept={imports.accept}
-        onFiles={(files) => void imports.importFiles(files)}
-        onLink={imports.importLink && ((address) => void imports.importLink?.(address))}
-      />
-
-      {recent.status === 'ready' && recent.data.length > 0 && (
-        <RecentList documents={recent.data} />
-      )}
-
-      {dragging && (
-        <div className={styles.dropTarget} aria-hidden="true">
-          <p>Drop to add to your library</p>
+        <div className={styles.preview}>
+          <LivePreview />
         </div>
-      )}
-    </div>
+      </section>
+
+      <section className={styles.band} aria-labelledby="how-title">
+        <div className={`container ${styles.section}`}>
+          <h2 id="how-title" className={styles.sectionTitle}>
+            How it works
+          </h2>
+          <ol className={styles.steps}>
+            {STEPS.map((step, index) => (
+              <li key={step.title} className={styles.step}>
+                <span className={styles.stepNumber} aria-hidden="true">
+                  {index + 1}
+                </span>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className={`container ${styles.section}`} aria-labelledby="tools-title">
+        <div className={styles.sectionHead}>
+          <h2 id="tools-title" className={styles.sectionTitle}>
+            Tools
+          </h2>
+          <p className={styles.sectionLede}>
+            Each tool is its own page, added one stage at a time.
+          </p>
+        </div>
+        <div className={styles.tools}>
+          {TOOLS.map((tool) => (
+            <ToolCard key={tool.title} tool={tool} />
+          ))}
+        </div>
+      </section>
+    </>
   );
 }

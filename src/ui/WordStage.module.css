@@ -1,0 +1,53 @@
+/* The reading stage: one word (or a few) held on a fixed focus point between two rules. */
+.stage {
+  position: relative;
+  display: grid;
+  align-items: center;
+  border-block: 2px solid var(--stage-line, var(--line));
+}
+
+/* Red marks above and below, pointing at where the focus letter sits. */
+.tick {
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  height: 18px;
+  background: var(--focus-letter);
+  translate: -50% 0;
+}
+
+.tickTop {
+  top: -2px;
+}
+
+.tickBottom {
+  bottom: -2px;
+}
+
+/*
+ * The focus letter is the middle column of three, so it stays dead centre
+ * while the rest of the text hangs off either side of it.
+ */
+.word {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: baseline;
+  font-family: var(--font-display);
+  /* --fit shrinks text that would not fit; see WordStage.tsx. */
+  font-size: calc(var(--word-size) * var(--fit, 1));
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: pre;
+}
+
+.before {
+  justify-self: end;
+}
+
+.pivot {
+  color: var(--focus-letter);
+}
+
+.after {
+  justify-self: start;
+}

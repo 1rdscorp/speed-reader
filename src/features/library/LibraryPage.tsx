@@ -52,7 +52,7 @@ export function LibraryPage() {
   }
 
   return (
-    <div className={styles.page}>
+    <div className={`container ${styles.page}`}>
       <title>{`Library · ${APP_NAME}`}</title>
 
       <header className={styles.header}>
@@ -62,7 +62,7 @@ export function LibraryPage() {
             {all.length} {all.length === 1 ? 'text' : 'texts'}
           </p>
         )}
-        <Link to={paths.home()} className={`${buttonClassName('primary')} ${styles.add}`}>
+        <Link to={paths.read()} className={`${buttonClassName('primary')} ${styles.add}`}>
           Add a text
         </Link>
       </header>

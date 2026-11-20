@@ -25,7 +25,7 @@ async function openLibraryStore(small: KeyValueStore): Promise<KeyValueStore> {
  * Swapping a backend, or adding a service, happens here.
  */
 export async function createServices(): Promise<Services> {
-  // Settings are tiny and index.html reads them before first paint, so they stay in localStorage.
+  // Settings are tiny and wanted at once, so they stay in localStorage.
   const small = createBrowserStore(STORAGE_NAMESPACE);
   return {
     documents: createDocumentRepository(await openLibraryStore(small)),

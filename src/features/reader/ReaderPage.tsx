@@ -1,46 +1,60 @@
-import type { ReactNode } from 'react';
-import { Link, useParams } from 'react-router';
-import { paths } from '@/lib/paths';
+import { useParams } from 'react-router';
+import { APP_NAME } from '@/lib/config';
 import { useServices } from '@/lib/services';
 import { useAsync } from '@/lib/useAsync';
-import { buttonClassName } from '@/ui';
+import { AddText } from './components/AddText';
+import { ControlsPanel } from './components/ControlsPanel';
 import styles from './Reader.module.css';
 import { ReaderSession } from './ReaderSession';
+import { SAMPLE_DOCUMENT } from './sample';
 
-function Notice({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <main className={styles.notice}>
-      <title>{title}</title>
-      <h1>{title}</h1>
-      <p>{children}</p>
-      <Link to={paths.home()} className={buttonClassName('primary')}>
-        Read something else
-      </Link>
-    </main>
-  );
-}
-
+/**
+ * The reading page. With a document id it shows that document; without one it
+ * shows whatever was read last, or a short explanation of the reader itself
+ * when the library is empty.
+ */
 export function ReaderPage() {
-  const { documentId = '' } = useParams();
+  const { documentId } = useParams();
   const { documents } = useServices();
-  const state = useAsync(() => documents.get(documentId), [documents, documentId]);
+  const state = useAsync(async () => {
+    if (documentId) return (await documents.get(documentId)) ?? null;
+    const [latest] = await documents.list();
+    return (latest && (await documents.get(latest.id))) ?? SAMPLE_DOCUMENT;
+  }, [documents, documentId]);
 
-  if (state.status === 'error') {
-    return (
-      <Notice title="This text could not be opened">
-        Something went wrong reading it from this browser’s storage. Reloading the page may help.
-      </Notice>
-    );
-  }
-  // Nothing is shown while loading (it takes an instant), or while a previous text is being replaced.
-  if (state.status === 'loading' || (state.data && state.data.id !== documentId)) return null;
-  if (!state.data || state.data.wordCount === 0) {
-    return (
-      <Notice title="This text is not here">
-        It may have been removed, or it was saved in a different browser. Texts are kept only on the
-        device where you added them.
-      </Notice>
-    );
-  }
-  return <ReaderSession key={state.data.id} document={state.data} />;
+  const document = state.status === 'ready' ? state.data : undefined;
+  // While another text is loading the previous one stays up; do not show it under the new address.
+  const current = document && (!documentId || document.id === documentId) ? document : undefined;
+  const missing = document === null || (current !== undefined && current.wordCount === 0);
+
+  return (
+    <div className={`container ${styles.page}`}>
+      <title>{current && !missing ? `${current.title} · ${APP_NAME}` : `Read · ${APP_NAME}`}</title>
+
+      <div className={styles.main}>
+        {state.status === 'error' && (
+          <div className={styles.notice} role="alert">
+            <h1>This text could not be opened</h1>
+            <p>
+              Something went wrong reading it from this browser’s storage. Reloading the page may
+              help.
+            </p>
+          </div>
+        )}
+        {missing && (
+          <div className={styles.notice}>
+            <h1>This text is not here</h1>
+            <p>
+              It may have been removed, or it was saved in a different browser. Texts are kept only
+              on the device where you added them.
+            </p>
+          </div>
+        )}
+        {current && !missing && <ReaderSession key={current.id} document={current} />}
+        <AddText />
+      </div>
+
+      <ControlsPanel />
+    </div>
+  );
 }

@@ -2,25 +2,26 @@ import { useEffect } from 'react';
 
 export interface ReaderActions {
   toggle: () => void;
+  /** Skip back or forward a fixed number of words. */
   back: () => void;
   forward: () => void;
+  previousSentence: () => void;
+  nextSentence: () => void;
   faster: () => void;
   slower: () => void;
   restart: () => void;
-  exit: () => void;
 }
 
 const KEYS: Record<string, keyof ReaderActions> = {
   ' ': 'toggle',
   k: 'toggle',
   ArrowLeft: 'back',
-  j: 'back',
   ArrowRight: 'forward',
-  l: 'forward',
+  'Shift+ArrowLeft': 'previousSentence',
+  'Shift+ArrowRight': 'nextSentence',
   ArrowUp: 'faster',
   ArrowDown: 'slower',
   r: 'restart',
-  Escape: 'exit',
 };
 
 /** True when the key should be left to the focused control instead. */
@@ -38,7 +39,9 @@ export function useReaderShortcuts(actions: ReaderActions): void {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
       if (belongsToFocusedControl(event)) return;
-      const action = KEYS[event.key.length === 1 ? event.key.toLowerCase() : event.key];
+      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+      const action =
+        KEYS[event.shiftKey ? `Shift+${key}` : key] ?? (event.shiftKey ? undefined : KEYS[key]);
       if (!action) return;
       event.preventDefault();
       actions[action]();

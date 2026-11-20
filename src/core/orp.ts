@@ -33,6 +33,33 @@ export function splitAtPivot(word: string): PivotSplit {
   };
 }
 
+/**
+ * Split a group of words around the letter nearest its middle, so the group
+ * sits evenly either side of the focus point.
+ */
+export function splitAtCentre(text: string): PivotSplit {
+  const chars = graphemes(text);
+  if (chars.length === 0) return { before: '', pivot: '', after: '' };
+  const middle = chars.length >> 1;
+  // The middle may be a space or punctuation; step outwards to the nearest letter.
+  let index = middle;
+  for (let distance = 0; distance < chars.length; distance += 1) {
+    const candidates = [middle - distance, middle + distance];
+    const found = candidates.find(
+      (i) => i >= 0 && i < chars.length && WORD_CHARACTER.test(chars[i]!),
+    );
+    if (found !== undefined) {
+      index = found;
+      break;
+    }
+  }
+  return {
+    before: chars.slice(0, index).join(''),
+    pivot: chars[index] ?? '',
+    after: chars.slice(index + 1).join(''),
+  };
+}
+
 function pivotOffset(length: number): number {
   if (length <= 1) return 0;
   if (length <= 5) return 1;

@@ -41,7 +41,7 @@ export function createDocumentRepository(
     });
   }
   // Reads wait for writes already under way, so a list requested right after
-  // a save (leaving the reader for the start page) reflects that save.
+  // a save (leaving the reader for the library) reflects that save.
   const settled = () => queue;
 
   return {

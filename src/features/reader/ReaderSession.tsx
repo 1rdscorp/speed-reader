@@ -1,101 +1,116 @@
-import { useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import {
+  DEFAULT_PAUSES,
+  NO_PAUSES,
+  Player,
   WPM_STEP,
+  buildFrames,
   buildTimeline,
+  frameIndexOf,
   indexAtOffset,
   nextSentence,
   previousSentence,
   remainingMs,
+  splitFrame,
   tokenize,
 } from '@/core';
-import { APP_NAME } from '@/lib/config';
 import type { ReadingDocument } from '@/lib/documents';
-import { paths } from '@/lib/paths';
 import { useServices } from '@/lib/services';
 import { useSettings } from '@/lib/settings';
-import { ArrowLeftIcon, IconButton } from '@/ui';
-import { Controls } from './components/Controls';
-import { Stage } from './components/Stage';
+import { ReaderCard, SKIP_WORDS } from './components/ReaderCard';
 import styles from './Reader.module.css';
-import { usePlayer } from './usePlayer';
 import { useProgressSync } from './useProgressSync';
 import { useReaderShortcuts, type ReaderActions } from './useReaderShortcuts';
 
 /**
  * One sitting with one document. Mount with `key={document.id}`: the text is
- * tokenised and the player created once, for the lifetime of the component.
+ * split into words and the player created once, for the lifetime of the component.
  */
 export function ReaderSession({ document }: { document: ReadingDocument }) {
   const { settings } = useServices();
-  const { wpm } = useSettings();
-  const navigate = useNavigate();
-  // Go back to the page the reader was opened from (start page or library).
-  // A reader opened directly from a link has no such page, and closes to the start.
-  const openedInApp = useLocation().key !== 'default';
+  const { wpm, fontSize, darkReader, wordsPerFrame, punctuationPauses } = useSettings();
 
   const tokens = useMemo(() => tokenize(document.text), [document.text]);
-  const timeline = useMemo(() => buildTimeline(tokens), [tokens]);
-  // Resume where the reader left off; a finished text starts over.
-  const [startIndex] = useState(() =>
-    document.progress.fraction >= 1 ? 0 : indexAtOffset(tokens, document.progress.offset),
+  const frames = useMemo(() => buildFrames(tokens, wordsPerFrame), [tokens, wordsPerFrame]);
+  const timeline = useMemo(
+    () => buildTimeline(tokens, punctuationPauses ? DEFAULT_PAUSES : NO_PAUSES, frames),
+    [tokens, punctuationPauses, frames],
   );
-  const { player, index, status } = usePlayer(timeline, wpm, startIndex);
-  useProgressSync(document.id, tokens, document.text.length, player);
 
-  const actions = useMemo<ReaderActions>(
-    () => ({
+  const [player] = useState(() => {
+    // Resume where the reader left off; a finished text starts over.
+    const startToken =
+      document.progress.fraction >= 1 ? 0 : indexAtOffset(tokens, document.progress.offset);
+    return new Player(timeline, { wpm, startIndex: frameIndexOf(frames, startToken) });
+  });
+  const { index, status } = useSyncExternalStore(player.subscribe, player.getSnapshot);
+
+  // When the words-at-a-time or pause setting changes, the same text gets new
+  // frames. Hand them to the player at the frame holding the word it was on.
+  // A layout effect, so the stage never paints an old index against new frames.
+  const playing = useRef({ frames, timeline });
+  useLayoutEffect(() => {
+    if (playing.current.timeline === timeline) return;
+    const token = playing.current.frames[player.getSnapshot().index]?.first ?? 0;
+    playing.current = { frames, timeline };
+    player.retime(timeline, frameIndexOf(frames, token));
+  }, [player, frames, timeline]);
+
+  useEffect(() => {
+    player.setWpm(wpm);
+  }, [player, wpm]);
+
+  // Stop the clock when the reader goes away.
+  useEffect(() => () => player.pause(), [player]);
+
+  useProgressSync(document.id, document.text.length, tokens, frames, player);
+
+  const actions = useMemo<ReaderActions>(() => {
+    const current = () => frames[player.getSnapshot().index]?.first ?? 0;
+    const seekToken = (token: number) => {
+      const clamped = Math.min(Math.max(token, 0), tokens.length - 1);
+      player.seek(frameIndexOf(frames, clamped));
+    };
+    return {
       toggle: () => player.toggle(),
-      back: () => player.seek(previousSentence(tokens, player.getSnapshot().index)),
-      forward: () => player.seek(nextSentence(tokens, player.getSnapshot().index)),
+      back: () => seekToken(current() - SKIP_WORDS),
+      forward: () => seekToken(current() + SKIP_WORDS),
+      previousSentence: () => seekToken(previousSentence(tokens, current())),
+      nextSentence: () => seekToken(nextSentence(tokens, current())),
       restart: () => player.seek(0),
       faster: () => settings.update({ wpm: settings.get().wpm + WPM_STEP }),
       slower: () => settings.update({ wpm: settings.get().wpm - WPM_STEP }),
-      exit: () => void (openedInApp ? navigate(-1) : navigate(paths.home())),
-    }),
-    [player, tokens, settings, navigate, openedInApp],
-  );
+    };
+  }, [player, tokens, frames, settings]);
   useReaderShortcuts(actions);
 
+  const frame = frames[Math.min(index, frames.length - 1)];
+  const wordNumber = (frame?.first ?? 0) + 1;
   const announcement = {
     playing: `Playing at ${wpm} words per minute`,
-    paused: `Paused at word ${index + 1} of ${tokens.length}`,
+    paused: `Paused at word ${wordNumber} of ${tokens.length}`,
     finished: 'Finished',
   }[status];
 
   return (
-    <div className={styles.reader} data-status={status}>
-      <title>{`${document.title} · ${APP_NAME}`}</title>
-
-      <header className={`${styles.topbar} ${styles.chrome}`}>
-        <IconButton label="Close reader" onClick={actions.exit}>
-          <ArrowLeftIcon />
-        </IconButton>
-        <h1 className={styles.title}>{document.title}</h1>
-      </header>
-
-      <Stage
-        word={tokens[index]?.text ?? ''}
+    <>
+      <h1 className={styles.title}>{document.title}</h1>
+      <ReaderCard
+        split={frame ? splitFrame(frame) : { before: '', pivot: '', after: '' }}
         status={status}
-        atStart={index === 0}
-        onToggle={actions.toggle}
+        wordNumber={wordNumber}
+        wordTotal={tokens.length}
+        remainingMs={remainingMs(timeline, index, wpm)}
+        step={index}
+        stepCount={frames.length}
+        fontSize={fontSize}
+        dark={darkReader}
+        actions={actions}
+        onSeek={(step) => player.seek(step)}
       />
-
-      <div className={styles.chrome}>
-        <Controls
-          status={status}
-          index={index}
-          length={tokens.length}
-          remainingMs={remainingMs(timeline, index, wpm)}
-          wpm={wpm}
-          actions={actions}
-          onSeek={(target) => player.seek(target)}
-        />
-      </div>
-
       <p role="status" className="visuallyHidden">
         {announcement}
       </p>
-    </div>
+    </>
   );
 }

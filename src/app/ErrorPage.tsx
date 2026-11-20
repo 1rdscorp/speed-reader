@@ -7,7 +7,7 @@ export function ErrorPage() {
   const error = useRouteError();
   console.error(error);
   return (
-    <div className={styles.message}>
+    <div className={`container ${styles.message}`}>
       <title>Something went wrong</title>
       <h1>Something went wrong.</h1>
       <p>Your saved texts are untouched. Reloading the page usually fixes it.</p>

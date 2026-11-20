@@ -1,3 +1,4 @@
+import type { Frame } from './frames';
 import type { Token } from './tokenize';
 
 export const MIN_WPM = 100;
@@ -18,6 +19,8 @@ export interface Pauses {
 }
 
 export const DEFAULT_PAUSES: Pauses = { clause: 0.4, sentence: 1, paragraph: 1.6 };
+/** Every word gets the same beat, whatever follows it. */
+export const NO_PAUSES: Pauses = { clause: 0, sentence: 0, paragraph: 0 };
 
 /** Words longer than this stay on screen a little longer for each extra character. */
 const LONG_WORD_LENGTH = 7;
@@ -31,28 +34,40 @@ export function tokenWeight(token: Token, pauses: Pauses = DEFAULT_PAUSES): numb
 }
 
 /**
- * Pre-computed pacing for a token sequence. Weights are independent of reading
- * speed, so changing WPM never requires rebuilding the timeline.
+ * Pre-computed pacing for a sequence of steps: tokens, or frames of several
+ * tokens. Weights are independent of reading speed, so changing WPM never
+ * requires rebuilding the timeline.
  */
 export interface Timeline {
-  /** Relative display time of each token. */
+  /** Relative display time of each step. */
   weights: Float64Array;
-  /** cumulative[i] is the total weight of all tokens before i; its length is tokens + 1. */
+  /** cumulative[i] is the total weight of all steps before i; its length is steps + 1. */
   cumulative: Float64Array;
   /** Real words in the text (a long word split into pieces counts once). */
   wordCount: number;
 }
 
-export function buildTimeline(tokens: readonly Token[], pauses: Pauses = DEFAULT_PAUSES): Timeline {
-  const weights = new Float64Array(tokens.length);
-  const cumulative = new Float64Array(tokens.length + 1);
-  let wordCount = 0;
-  tokens.forEach((token, i) => {
-    const weight = tokenWeight(token, pauses);
+/**
+ * Build the pacing for a text. Without `frames` there is one step per token;
+ * with them, one step per frame, lasting as long as its tokens would in turn.
+ */
+export function buildTimeline(
+  tokens: readonly Token[],
+  pauses: Pauses = DEFAULT_PAUSES,
+  frames?: readonly Frame[],
+): Timeline {
+  const steps = frames ?? tokens.map((_, index) => ({ first: index, last: index }));
+  const weights = new Float64Array(steps.length);
+  const cumulative = new Float64Array(steps.length + 1);
+  steps.forEach((step, i) => {
+    let weight = 0;
+    for (let index = step.first; index <= step.last; index += 1) {
+      weight += tokenWeight(tokens[index]!, pauses);
+    }
     weights[i] = weight;
     cumulative[i + 1] = cumulative[i]! + weight;
-    if (!token.continues) wordCount += 1;
   });
+  const wordCount = tokens.reduce((count, token) => count + (token.continues ? 0 : 1), 0);
   return { weights, cumulative, wordCount };
 }
 

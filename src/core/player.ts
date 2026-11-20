@@ -32,7 +32,7 @@ export interface PlayerOptions {
  * React: subscribe for snapshots and render them however you like.
  */
 export class Player {
-  readonly #timeline: Timeline;
+  #timeline: Timeline;
   readonly #scheduler: Scheduler;
   readonly #listeners = new Set<() => void>();
   #wpm: number;
@@ -94,6 +94,23 @@ export class Player {
   /** Takes effect from the next token. */
   setWpm(wpm: number): void {
     this.#wpm = clampWpm(wpm);
+  }
+
+  /**
+   * Swap in a different timeline for the same text (grouped or paced another
+   * way) and continue from `index` in it. Playback carries on if it was running.
+   */
+  retime(timeline: Timeline, index: number): void {
+    const { status } = this.#snapshot;
+    this.#cancel();
+    this.#timeline = timeline;
+    // Always a new snapshot: the same numbers now mean a different place.
+    this.#snapshot = { index: this.#clampIndex(index), status };
+    for (const listener of this.#listeners) listener();
+    if (status === 'playing') {
+      this.#deadline = this.#scheduler.now();
+      this.#schedule();
+    }
   }
 
   #schedule(): void {
