@@ -34,6 +34,17 @@ The build is a plain static site with relative asset paths and hash-based URLs
 with no server configuration. The one feature that needs more than a static
 host is importing from a link; see [below](#importing-from-a-link).
 
+### Publishing
+
+Every push to the default branch that passes the checks is built and published
+to GitHub Pages by the CI workflow (`.github/workflows/ci.yml`). This relies on
+**Settings → Pages → Build and deployment → Source** being set to **GitHub
+Actions**; with "Deploy from a branch", Pages would serve the unbuilt source
+files, which is a blank page.
+
+GitHub Pages serves static files only, so the published site has link import
+switched off. Everything else works there.
+
 ## What it does
 
 Reading:
