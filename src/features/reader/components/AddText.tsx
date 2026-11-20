@@ -14,6 +14,7 @@ import { useServices } from '@/lib/services';
 import { useSettings } from '@/lib/settings';
 import { StorageFullError } from '@/lib/storage';
 import { Button, FileIcon, SelectField } from '@/ui';
+import { releaseFocusAfterPointer } from '../releaseFocus';
 import { useFileDrop } from '../useFileDrop';
 import { useImport } from '../useImport';
 import styles from './AddText.module.css';
@@ -86,7 +87,8 @@ export function AddText() {
       const created = await documents.create(generated);
       // Show what was generated in the text box as well, where it can be read over or edited.
       setText(generated.text);
-      await navigate(paths.read(created.id));
+      // Stay where the person is, by the text box; the reading area comes into view when they press play.
+      await navigate(paths.read(created.id), { preventScrollReset: true });
     } catch {
       setError(SAVE_FAILED);
     }
@@ -149,7 +151,12 @@ export function AddText() {
         </div>
       </form>
 
-      <form className={styles.generate} onSubmit={(event) => void generate(event)}>
+      {/* Focus is let go after a click here, so Space then starts the new text instead of generating again. */}
+      <form
+        className={styles.generate}
+        onSubmit={(event) => void generate(event)}
+        onClick={releaseFocusAfterPointer}
+      >
         <div>
           <h2 className={styles.label}>Nothing to hand? Generate a practice text</h2>
           <p className={styles.hint}>

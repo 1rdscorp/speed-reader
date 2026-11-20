@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   DEFAULT_PAUSES,
   NO_PAUSES,
@@ -54,6 +54,12 @@ export function ReaderSession({ document }: { document: ReadingDocument }) {
 
   const cardRef = useRef<HTMLDivElement>(null);
   const fullscreen = useFullscreen(cardRef);
+
+  // Starting to play brings the reading area into view, wherever the page was scrolled to.
+  useEffect(() => {
+    if (status === 'playing')
+      cardRef.current?.scrollIntoView?.({ block: 'center', behavior: 'smooth' });
+  }, [status]);
 
   const actions = useMemo<ReaderActions>(() => {
     const current = () => frames[player.getSnapshot().index]?.first ?? 0;
