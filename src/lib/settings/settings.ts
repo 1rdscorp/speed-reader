@@ -18,14 +18,10 @@ export type FocusColor = (typeof FOCUS_COLORS)[number]['id'];
 
 export type Theme = 'light' | 'dark';
 
-/** Colours the reading area can be given in full screen. Tints have a `--screen-<id>` token in styles/tokens.css. */
+/** Colours the reading area can be given in full screen. */
 export const SCREEN_COLORS = [
   { id: 'dark', label: 'Dark' },
   { id: 'white', label: 'White' },
-  { id: 'green', label: 'Green' },
-  { id: 'yellow', label: 'Yellow' },
-  { id: 'red', label: 'Red' },
-  { id: 'blue', label: 'Blue' },
 ] as const;
 
 /** 'auto' means no choice has been made: full screen looks like the reading area on the page. */

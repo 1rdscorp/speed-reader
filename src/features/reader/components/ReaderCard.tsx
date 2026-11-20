@@ -1,16 +1,18 @@
 import type { CSSProperties, RefObject } from 'react';
 import type { PivotSplit, PlayerStatus } from '@/core';
 import { formatClock, formatCount } from '@/lib/format';
-import { SCREEN_COLORS, type ScreenColor } from '@/lib/settings';
+import type { ScreenColor } from '@/lib/settings';
 import {
   CollapseIcon,
   ExpandIcon,
   ForwardIcon,
+  MoonIcon,
   PauseIcon,
   PlayIcon,
   ReadingSurface,
   RestartIcon,
   RewindIcon,
+  SunIcon,
   WordStage,
 } from '@/ui';
 import { releaseFocusAfterPointer } from '../releaseFocus';
@@ -91,24 +93,19 @@ export function ReaderCard({
           {/* The speed control is out of sight in full screen, so say what it is set to. */}
           {fullscreen && ` · ${wpm} WPM`}
         </span>
-        {fullscreen && (
-          <span className={styles.screens} role="group" aria-label="Screen color">
-            {SCREEN_COLORS.map((color) => (
-              <button
-                key={color.id}
-                type="button"
-                className={styles.screenChoice}
-                data-color={color.id}
-                aria-label={color.label}
-                title={color.label}
-                aria-pressed={screenColor === color.id}
-                onClick={() => onScreenColor(color.id)}
-              />
-            ))}
-          </span>
-        )}
         <span className={styles.metaEnd}>
           {formatClock(status === 'finished' ? 0 : remainingMs)} left
+          {fullscreen && (
+            <button
+              type="button"
+              className={styles.expand}
+              aria-label={isDark ? 'Switch to white screen' : 'Switch to dark screen'}
+              title={isDark ? 'White screen' : 'Dark screen'}
+              onClick={() => onScreenColor(isDark ? 'white' : 'dark')}
+            >
+              {isDark ? <SunIcon /> : <MoonIcon />}
+            </button>
+          )}
           <button
             type="button"
             className={styles.expand}

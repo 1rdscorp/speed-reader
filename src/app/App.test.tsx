@@ -274,18 +274,19 @@ describe('reader', () => {
     await user.keyboard('{ArrowUp}{ArrowRight}');
     expect(screen.getByText(/Word 11 of 20 · 325 WPM/)).toBeTruthy();
 
-    // The screen can be given a colour, which is remembered but only applies in full screen.
-    await user.click(screen.getByRole('button', { name: 'Yellow' }));
-    expect(card().getAttribute('data-screen')).toBe('yellow');
-    await user.click(screen.getByRole('button', { name: 'Dark' }));
+    // One button switches the screen between white and dark; it is remembered but only applies in full screen.
+    await user.click(screen.getByRole('button', { name: 'Switch to dark screen' }));
     expect(card().hasAttribute('data-dark')).toBe(true);
     expect(services.settings.get().screenColor).toBe('dark');
+    await user.click(screen.getByRole('button', { name: 'Switch to white screen' }));
+    expect(card().getAttribute('data-screen')).toBe('white');
+    await user.click(screen.getByRole('button', { name: 'Switch to dark screen' }));
 
     await user.click(screen.getByRole('button', { name: 'Exit full screen' }));
     expect(card().hasAttribute('data-fullscreen')).toBe(false);
     expect(card().hasAttribute('data-screen')).toBe(false);
     expect(card().hasAttribute('data-dark')).toBe(false);
-    expect(screen.queryByRole('group', { name: 'Screen color' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /(white|dark) screen$/ })).toBeNull();
 
     await user.keyboard('f');
     expect(card().hasAttribute('data-fullscreen')).toBe(true);

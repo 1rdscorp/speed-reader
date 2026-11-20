@@ -60,77 +60,17 @@
   align-items: center;
 }
 
-/* A white or tinted screen: pale ground, dark text, whatever the site's theme. */
-.card[data-screen]:not([data-screen='dark']) {
+/* A white screen: pale ground and dark text, whatever the site's theme. */
+.card[data-screen='white'] {
+  --surface: var(--screen-white);
   --ink: var(--screen-ink);
   --ink-muted: var(--screen-muted);
   --line: var(--screen-line);
   --outline: var(--screen-line);
 }
 
-.card[data-screen='white'] {
-  --surface: var(--screen-white);
-}
-
-.card[data-screen='green'] {
-  --surface: var(--screen-green);
-}
-
-.card[data-screen='yellow'] {
-  --surface: var(--screen-yellow);
-}
-
-.card[data-screen='red'] {
-  --surface: var(--screen-red);
-}
-
-.card[data-screen='blue'] {
-  --surface: var(--screen-blue);
-}
-
-/* The colour choices: one dot each, the chosen one ringed. */
-.screens {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.screenChoice {
-  width: 1.75rem;
-  height: 1.75rem;
-  padding: 0;
-  border: 1.5px solid var(--ink-muted);
-  border-radius: 50%;
-  background: var(--choice);
-  cursor: pointer;
-}
-
-.screenChoice[aria-pressed='true'] {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
-
-.screenChoice[data-color='dark'] {
-  --choice: var(--night-bg);
-}
-
-.screenChoice[data-color='white'] {
-  --choice: var(--screen-white);
-}
-
-.screenChoice[data-color='green'] {
-  --choice: var(--screen-green);
-}
-
-.screenChoice[data-color='yellow'] {
-  --choice: var(--screen-yellow);
-}
-
-.screenChoice[data-color='red'] {
-  --choice: var(--screen-red);
-}
-
-.screenChoice[data-color='blue'] {
-  --choice: var(--screen-blue);
+.card[data-fullscreen] .expand {
+  margin-right: 0;
 }
 
 .card[data-fullscreen] .stageArea {

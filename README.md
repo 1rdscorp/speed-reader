@@ -58,8 +58,8 @@ Reading:
   bar to any position.
 - Choose the size of the word, the color of its focus letter, and a dark
   reading area. The Settings page shows every setting with a live preview.
-- Make the reading area fill the screen, with a larger word, and give that
-  screen a color: dark, white, green, yellow, red or blue.
+- Make the reading area fill the screen, with a larger word, and switch that
+  screen between white and dark.
 - Switch the whole site between light and dark with the button in the header.
 - Keyboard: `Space` play/pause · `←` `→` ten words · `Shift` + `←` `→` sentence ·
   `↑` `↓` speed · `R` restart · `F` full screen.

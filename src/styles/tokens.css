@@ -49,15 +49,11 @@
   --night-muted: #a9acb5;
   --night-line: #34373f;
   --night-outline: #9db0ff;
-  /* Grounds the reading area can take in full screen. The tints are pale, so dark text stays easy to read. */
+  /* The reading area in full screen when it is set to white, whatever the site's theme. */
   --screen-white: #ffffff;
-  --screen-green: #d3f9d8;
-  --screen-yellow: #fff3bf;
-  --screen-red: #ffe3e3;
-  --screen-blue: #d0ebff;
   --screen-ink: #16181d;
   --screen-muted: #4a4d55;
-  --screen-line: rgb(22 24 29 / 18%);
+  --screen-line: #e3e3dc;
 
   --font-sans: 'Inter Variable', Inter, system-ui, sans-serif;
   --font-display: 'Space Grotesk Variable', 'Space Grotesk', system-ui, sans-serif;
