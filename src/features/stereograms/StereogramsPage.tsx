@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { APP_NAME } from '@/lib/config';
 import { useServices } from '@/lib/services';
 import { shuffledOrder, type OwnStereogram } from '@/lib/stereograms';
@@ -37,6 +37,22 @@ export function StereogramsPage() {
     setRevealed(false);
   }
 
+  // The left and right arrow keys step through the pictures, unless something is being typed.
+  useEffect(() => {
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (event.target instanceof Element && event.target.closest('input, textarea, select')) {
+        return;
+      }
+      event.preventDefault();
+      setPosition((index + (event.key === 'ArrowRight' ? 1 : -1) + total) % total);
+      setRevealed(false);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [index, total]);
+
   return (
     <div className={`container ${styles.page}`}>
       <title>{`Stereograms · ${APP_NAME}`}</title>
@@ -45,7 +61,7 @@ export function StereogramsPage() {
         <p className={styles.lede}>
           Each picture hides a word. Look at the two dots at the top and relax your eyes, as if
           looking through the screen, until you see three dots. Hold that, and the word rises out of
-          the pattern.
+          the pattern. The left and right arrow keys change the picture.
         </p>
       </header>
 

@@ -907,6 +907,24 @@ describe('stereograms', () => {
     expect(screen.getByText('Stereogram 60 of 60')).toBeTruthy();
   });
 
+  it('changes the picture with the left and right arrow keys, but not while typing', async () => {
+    const { user } = renderApp('/stereograms');
+    await screen.findByText('Stereogram 1 of 60');
+    await user.keyboard('{ArrowRight}{ArrowRight}');
+    expect(screen.getByText('Stereogram 3 of 60')).toBeTruthy();
+    await user.keyboard('{ArrowLeft}');
+    expect(screen.getByText('Stereogram 2 of 60')).toBeTruthy();
+    // Past the first is the last, and a shown word is hidden again on the next picture.
+    await user.click(screen.getByRole('button', { name: 'Show image' }));
+    await user.keyboard('{ArrowLeft}{ArrowLeft}');
+    expect(screen.getByText('Stereogram 60 of 60')).toBeTruthy();
+    expect(screen.queryByText(/hidden word is/)).toBeNull();
+
+    // In the answer box the arrows move the cursor, as usual.
+    await user.type(screen.getByLabelText(/What is hidden/), 'ab{ArrowLeft}{ArrowRight}');
+    expect(screen.getByText('Stereogram 60 of 60')).toBeTruthy();
+  });
+
   it('can fill the screen, and comes back with Escape', async () => {
     const { user } = renderApp('/stereograms');
     await screen.findByText('Stereogram 1 of 60');
