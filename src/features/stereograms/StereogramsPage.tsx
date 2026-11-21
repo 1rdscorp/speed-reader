@@ -55,7 +55,7 @@ export function StereogramsPage() {
           <span>
             Stereogram {index + 1} of {total}
             {ownEntry ? ` · ${ownEntry.name}` : ''}
-            {builtIn && <span> · {builtIn.file ? 'Random dots' : styleName(index)}</span>}
+            {builtIn && <span> · {builtIn.kind ?? styleName(index)}</span>}
           </span>
           <IconButton
             label={fullscreen.active ? 'Exit full screen' : 'Full screen'}
