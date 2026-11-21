@@ -85,8 +85,9 @@ Stereograms:
   contours, galaxy, bubbles, brush strokes and leaves) and colour set. They
   are drawn in the browser from a seed (`src/lib/stereograms` and
   `src/features/stereograms/textures.ts`), so no image files are shipped.
-- Four ready-made random-dot stereograms follow them. They are picture files
-  in `public/stereograms/`, listed in `src/features/stereograms/pictures.ts`.
+- Four ready-made random-dot stereograms follow them, also 3840 × 2160. They
+  are picture files in `public/stereograms/`, listed in
+  `src/features/stereograms/pictures.ts`.
 - Take as long as you like over each one; "Show image" reveals the hidden word.
 - The picture can fill the screen, with its buttons.
 - Add stereogram pictures of your own, with an optional answer. They follow the

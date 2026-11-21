@@ -71,8 +71,8 @@ export function StereogramsPage() {
             className={styles.picture}
             src={pictureUrl(builtIn.file)}
             alt={`Stereogram ${index + 1}`}
-            width={1920}
-            height={1080}
+            width={3840}
+            height={2160}
           />
         ) : builtIn ? (
           <BuiltInPicture word={builtIn.word} index={index} revealed={revealed} />
