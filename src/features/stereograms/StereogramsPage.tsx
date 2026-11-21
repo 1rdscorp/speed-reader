@@ -1,13 +1,14 @@
 import { useRef, useState } from 'react';
 import { APP_NAME } from '@/lib/config';
 import { useServices } from '@/lib/services';
-import { HIDDEN_WORDS, type OwnStereogram } from '@/lib/stereograms';
+import type { OwnStereogram } from '@/lib/stereograms';
 import { useAsync } from '@/lib/useAsync';
 import { useFullscreen } from '@/lib/useFullscreen';
 import { Button, CollapseIcon, ExpandIcon, IconButton } from '@/ui';
 import { AddOwn } from './AddOwn';
 import { BuiltInPicture } from './BuiltInPicture';
 import { OwnPicture } from './OwnPicture';
+import { BUILT_IN, pictureUrl } from './pictures';
 import styles from './Stereograms.module.css';
 import { styleName } from './textures';
 
@@ -15,7 +16,7 @@ export function StereogramsPage() {
   const { stereograms } = useServices();
   const saved = useAsync(() => stereograms.list(), [stereograms]);
   const own: OwnStereogram[] = saved.status === 'ready' ? saved.data : [];
-  const total = HIDDEN_WORDS.length + own.length;
+  const total = BUILT_IN.length + own.length;
 
   const [position, setPosition] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -24,8 +25,8 @@ export function StereogramsPage() {
 
   // A picture that was removed while it was showing leaves the position past the end.
   const index = Math.min(position, total - 1);
-  const word = HIDDEN_WORDS[index];
-  const ownEntry = own[index - HIDDEN_WORDS.length];
+  const builtIn = BUILT_IN[index];
+  const ownEntry = own[index - BUILT_IN.length];
 
   function show(next: number) {
     setPosition((next + total) % total);
@@ -54,7 +55,7 @@ export function StereogramsPage() {
           <span>
             Stereogram {index + 1} of {total}
             {ownEntry ? ` · ${ownEntry.name}` : ''}
-            {word !== undefined && <span> · {styleName(index)}</span>}
+            {builtIn && <span> · {builtIn.file ? 'Random dots' : styleName(index)}</span>}
           </span>
           <IconButton
             label={fullscreen.active ? 'Exit full screen' : 'Full screen'}
@@ -65,16 +66,24 @@ export function StereogramsPage() {
           </IconButton>
         </div>
 
-        {word !== undefined ? (
-          <BuiltInPicture word={word} index={index} revealed={revealed} />
+        {builtIn?.file && !revealed ? (
+          <img
+            className={styles.picture}
+            src={pictureUrl(builtIn.file)}
+            alt={`Stereogram ${index + 1}`}
+            width={1920}
+            height={1080}
+          />
+        ) : builtIn ? (
+          <BuiltInPicture word={builtIn.word} index={index} revealed={revealed} />
         ) : (
           ownEntry && <OwnPicture entry={ownEntry} />
         )}
 
         {revealed && (
           <p className={styles.answer} role="status">
-            {word !== undefined
-              ? `The hidden word is ${word}.`
+            {builtIn
+              ? `The hidden word is ${builtIn.word}.`
               : ownEntry?.answer
                 ? `Hidden in it: ${ownEntry.answer}`
                 : 'No answer was saved with this picture.'}
@@ -93,7 +102,7 @@ export function StereogramsPage() {
       <AddOwn
         own={own}
         onChanged={saved.reload}
-        onView={(entry) => show(HIDDEN_WORDS.length + own.indexOf(entry))}
+        onView={(entry) => show(BUILT_IN.length + own.indexOf(entry))}
       />
     </div>
   );
