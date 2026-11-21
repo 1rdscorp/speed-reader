@@ -95,6 +95,14 @@ Stereograms:
 - Add stereogram pictures of your own, with an optional answer. They follow the
   built-in ones and are saved in the browser.
 
+Games:
+
+- Two typing games, each its own page shown inside the site.
+- Word Search, built into the site: words from a theme hidden in a square of
+  letters, across, down and along the diagonals. Drag across a word, or click
+  its first and last letters. Three levels, a clock, a score, hints, and a new
+  puzzle every game (`src/lib/wordsearch` makes them).
+
 Keeping it:
 
 - Everything is saved in the browser, in IndexedDB, with room for whole books.
@@ -141,6 +149,8 @@ src/
                  each loaded only when first needed.
     practice/    Practice texts: a bank of short passages and the generator
                  that assembles them by topic and length.
+    wordsearch/  Word search puzzles: themed word lists, and the maker that
+                 hides each word exactly once in a square of letters.
     stereograms/ The stereogram generator (any texture, bent over a depth
                  map), smooth noise, the hidden words, and storage for
                  pictures the person adds.
@@ -151,9 +161,10 @@ src/
     reader/      The Read page: the reading area, its controls, adding text.
     library/     Everything saved: search, sort, rename, remove.
     settings/    Reading settings, with a preview of their effect.
-    games/       Typing games. Each is a self-contained page in public/games/,
-                 shown in a frame, with a small preview picture beside its
-                 name; add one by listing it in games.ts.
+    games/       Games, listed in games.ts with a small preview picture each.
+                 A game is either a self-contained page in public/games/,
+                 shown in a frame, or a component built into the site
+                 (wordsearch/).
     stereograms/ Hidden-word pictures, revealing the word, adding your own.
   app/         Composition: feature registry, routes, shell, service wiring.
   styles/      Design tokens and base styles.
@@ -219,7 +230,7 @@ The plan follows the tool cards on the front page.
 4. **Speed test and progress** — measure WPM with a short quiz and keep a
    history.
 
-Also built, outside that list: the library, file import, typing games and
+Also built, outside that list: the library, file import, games and
 stereograms. Link import works
 locally but is off on the published site, because GitHub Pages cannot run the
 page endpoint (see [Importing from a link](#importing-from-a-link)).

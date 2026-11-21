@@ -571,6 +571,144 @@ describe('games', () => {
     expect(screen.getByRole('link', { name: 'All games' })).toBeTruthy();
   });
 
+  /** Read the puzzle off the page and find where each listed word is, as a player would. */
+  function locate() {
+    const letters = [...document.querySelectorAll<HTMLElement>('[data-row][data-col]')];
+    const size = Math.sqrt(letters.length);
+    const at = (row: number, col: number) =>
+      letters.find((el) => el.dataset.row === String(row) && el.dataset.col === String(col));
+    const words = within(screen.getByRole('list', { name: 'Words to find' }))
+      .getAllByRole('listitem')
+      .map((item) => item.firstChild!.textContent ?? '');
+    const steps = [-1, 0, 1].flatMap((rowStep) => [-1, 0, 1].map((colStep) => [rowStep, colStep]));
+    const found = words.map((word) => {
+      for (let row = 0; row < size; row += 1) {
+        for (let col = 0; col < size; col += 1) {
+          for (const [rowStep, colStep] of steps) {
+            if (!rowStep && !colStep) continue;
+            const reads = [...word].every(
+              (letter, i) => at(row + rowStep! * i, col + colStep! * i)?.textContent === letter,
+            );
+            if (reads) {
+              const last = word.length - 1;
+              return {
+                word,
+                first: at(row, col)!,
+                last: at(row + rowStep! * last, col + colStep! * last)!,
+              };
+            }
+          }
+        }
+      }
+      throw new Error(`${word} is not in the grid`);
+    });
+    return { size, found, at };
+  }
+  const score = () => screen.getByText('Score').nextElementSibling!.textContent;
+
+  it('lists the word search, with its preview', async () => {
+    renderApp('/games');
+    const link = await screen.findByRole('link', { name: /Word Search/ });
+    expect(link.querySelector('img')!.getAttribute('src')).toMatch(/games\/word-search\.jpg$/);
+    expect(link.getAttribute('href')).toBe('/games/word-search');
+  });
+
+  it('plays a word search: marking words, a wrong guess, and finishing', async () => {
+    const { user } = renderApp('/games/word-search');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Word Search' })).toBeTruthy();
+    await screen.findByRole('list', { name: 'Words to find' });
+    const { size, found, at } = locate();
+    expect(size).toBe(8);
+    expect(found).toHaveLength(6);
+    expect(screen.getByText('0 of 6')).toBeTruthy();
+
+    // Click the first letter of a word, then its last.
+    const [one, two, ...rest] = found;
+    await user.click(one!.first);
+    expect(one!.first.getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByText('Now choose the last letter of the word.')).toBeTruthy();
+    await user.click(one!.last);
+    expect(
+      screen.getByText(new RegExp(`^Found ${one!.word}: \\d+ points\\. 5 to go\\.$`)),
+    ).toBeTruthy();
+    expect(screen.getByText('1 of 6')).toBeTruthy();
+    expect(score()).toBe(String(one!.word.length * 10));
+    expect(screen.getByText(`${one!.word}`).closest('li')!.hasAttribute('data-found')).toBe(true);
+    expect(one!.first.hasAttribute('data-found')).toBe(true);
+
+    // A word can be marked from its far end, but not twice.
+    await user.click(two!.last);
+    await user.click(two!.first);
+    expect(screen.getByText('2 of 6')).toBeTruthy();
+    await user.click(two!.first);
+    await user.click(two!.last);
+    expect(screen.getByText(`You already found ${two!.word}.`)).toBeTruthy();
+    expect(screen.getByText('2 of 6')).toBeTruthy();
+
+    // Letters that are not a listed word change nothing.
+    const before = score()!;
+    await user.click(at(0, 0)!);
+    await user.click(at(0, 1)!);
+    expect(screen.getByText(/^[A-Z]{2} is not one of the words\.$/)).toBeTruthy();
+    expect(score()).toBe(before);
+
+    // A hint points at a word still hidden, and costs points.
+    await user.click(screen.getByRole('button', { name: 'Hint' }));
+    expect(screen.getByText(/^[A-Z]+ starts at the flashing letter\.$/)).toBeTruthy();
+    expect(Number(score())).toBe(Number(before) - 15);
+
+    for (const { first, last } of rest) {
+      await user.click(first);
+      await user.click(last);
+    }
+    expect(screen.getByText(/^You found all 6 words in \d+:\d\d\. Score: \d+\.$/)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Hint' })).toHaveProperty('disabled', true);
+
+    await user.click(screen.getByRole('button', { name: 'New game' }));
+    expect(screen.getByText('0 of 6')).toBeTruthy();
+    expect(score()).toBe('0');
+  });
+
+  it('moves between letters with the arrow keys, and has bigger puzzles on harder levels', async () => {
+    const { user } = renderApp('/games/word-search');
+    await screen.findByRole('list', { name: 'Words to find' });
+    const { at } = locate();
+
+    at(0, 0)!.focus();
+    await user.keyboard('{ArrowRight}{ArrowDown}{ArrowDown}');
+    expect(document.activeElement).toBe(at(2, 1));
+    await user.keyboard('{ArrowLeft}{ArrowLeft}{ArrowUp}');
+    expect(document.activeElement).toBe(at(1, 0));
+    // Enter marks one end; Escape lets go of it.
+    await user.keyboard('{Enter}');
+    expect(at(1, 0)!.getAttribute('aria-pressed')).toBe('true');
+    await user.keyboard('{Escape}');
+    expect(at(1, 0)!.getAttribute('aria-pressed')).toBe('false');
+
+    await user.click(screen.getByRole('button', { name: 'Medium' }));
+    expect(locate().size).toBe(10);
+    expect(screen.getByText('0 of 9')).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: 'Hard' }));
+    const hard = locate();
+    expect(hard.size).toBe(12);
+    expect(hard.found).toHaveLength(12);
+    expect(screen.getByRole('button', { name: 'Hard' }).getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('keeps time until the puzzle is finished', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    try {
+      renderApp('/games/word-search');
+      await screen.findByRole('list', { name: 'Words to find' });
+      expect(screen.getByRole('timer').textContent).toBe('0:00');
+      act(() => {});
+      act(() => void vi.advanceTimersByTime(75_000));
+      expect(screen.getByRole('timer').textContent).toBe('1:15');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('says so when a game does not exist', async () => {
     renderApp('/games/nope');
     expect(await screen.findByRole('heading', { name: /no game at this address/ })).toBeTruthy();

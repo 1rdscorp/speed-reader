@@ -1,15 +1,30 @@
-export interface Game {
+import { lazy, type ComponentType } from 'react';
+
+interface GameBase {
   /** Used in the address: /games/<id>. */
   id: string;
   title: string;
   description: string;
-  /** The game itself: a self-contained page in public/games/. */
-  file: string;
-  /** A small picture of the game being played, also in public/games/. */
+  /** A small picture of the game being played, in public/games/. */
   preview: string;
 }
 
-/** The games on the site. To add one, put its page and a preview picture in public/games/ and list it here. */
+/** A game that is its own self-contained page in public/games/, shown in a frame. */
+export interface FramedGame extends GameBase {
+  file: string;
+}
+
+/** A game built into the site, in the site's own look. It is loaded only when opened. */
+export interface BuiltInGame extends GameBase {
+  Play: ComponentType;
+}
+
+export type Game = FramedGame | BuiltInGame;
+
+/**
+ * The games on the site. To add one, list it here with a preview picture in
+ * public/games/: either its page, also in public/games/, or its component.
+ */
 export const GAMES: Game[] = [
   {
     id: 'flying-mile',
@@ -27,10 +42,18 @@ export const GAMES: Game[] = [
     file: 'keystorm.html',
     preview: 'keystorm.jpg',
   },
+  {
+    id: 'word-search',
+    title: 'Word Search',
+    description:
+      'Find the words hidden in a square of letters: across, down and along the diagonals. Three levels, with a new puzzle every time.',
+    preview: 'word-search.jpg',
+    Play: lazy(async () => ({ default: (await import('./wordsearch/WordSearch')).WordSearch })),
+  },
 ];
 
 /** Address of a game's page, relative to wherever the site is hosted. */
-export const gameUrl = (game: Game) => `${import.meta.env.BASE_URL}games/${game.file}`;
+export const gameUrl = (game: FramedGame) => `${import.meta.env.BASE_URL}games/${game.file}`;
 
 /** Address of a game's preview picture. */
 export const previewUrl = (game: Game) => `${import.meta.env.BASE_URL}games/${game.preview}`;

@@ -10,7 +10,9 @@ export function GamesPage() {
       <title>{`Games · ${APP_NAME}`}</title>
       <header>
         <h1 className={styles.title}>Games</h1>
-        <p className={styles.lede}>Typing games for a break between reads. Both need a keyboard.</p>
+        <p className={styles.lede}>
+          Games for a break between reads. The two typing games need a keyboard.
+        </p>
       </header>
       <ul className={styles.list}>
         {GAMES.map((game) => (
