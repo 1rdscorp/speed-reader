@@ -78,23 +78,27 @@ describe('adding text', () => {
     expect(stageWord()).toBe('Most');
   });
 
-  it('reads pasted text and keeps it in the library', async () => {
+  it('saves pasted text and goes to the library, where it can be opened to read', async () => {
     const { user, router, services } = renderApp('/read');
 
-    const read = await screen.findByRole('button', { name: 'Read this text' });
-    expect(read).toHaveProperty('disabled', true);
+    const save = await screen.findByRole('button', { name: 'Save This Text' });
+    expect(save).toHaveProperty('disabled', true);
+    expect(screen.queryByRole('button', { name: 'Read this text' })).toBeNull();
 
     await user.type(screen.getByLabelText('Your text'), 'Steady pace wins. Every time.');
     expect(screen.getByText(/5 words/)).toBeTruthy();
-    await user.click(read);
+    await user.click(save);
 
+    // The library opens, with the saved text in it.
+    const saved = await screen.findByRole('link', { name: /Steady pace wins\. Every time\./ });
+    expect(router.state.location.pathname).toBe('/library');
+    expect(await services.documents.list()).toHaveLength(1);
+
+    // Opening it from there reads it.
+    await user.click(saved);
     await waitFor(() => expect(stageWord()).toBe('Steady'));
-    expect(
-      screen.getByRole('heading', { level: 1, name: 'Steady pace wins. Every time.' }),
-    ).toBeTruthy();
     expect(router.state.location.pathname).toMatch(/^\/read\/\w+$/);
     expect(screen.getByLabelText('Your text')).toHaveProperty('value', '');
-    expect(await services.documents.list()).toHaveLength(1);
   });
 
   it('opens a chosen file straight in the reader', async () => {
@@ -167,8 +171,9 @@ describe('adding text', () => {
     const { user, services } = renderApp('/read');
     await user.click(await screen.findByRole('button', { name: 'Generate text' }));
     await screen.findByRole('heading', { level: 1, name: / and 4 more$/ });
-    await user.click(screen.getByRole('button', { name: 'Read this text' }));
+    await user.click(screen.getByRole('button', { name: 'Save This Text' }));
     await waitFor(async () => expect(await services.documents.list()).toHaveLength(1));
+    expect(await screen.findByRole('heading', { level: 1, name: 'Library' })).toBeTruthy();
   });
 
   it('offers link import only when there is a way to fetch pages', async () => {

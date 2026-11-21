@@ -52,13 +52,14 @@ export function AddText({ onGenerated }: { onGenerated: (text: NewDocument) => v
   const wordCount = useMemo(() => countWords(text), [text]);
   const busy = imports.state.reading !== null;
 
-  async function readPasted() {
+  async function savePasted() {
     if (wordCount === 0) return;
     setError(null);
     try {
-      const created = await documents.create({ text, source: { kind: 'paste' } });
+      await documents.create({ text, source: { kind: 'paste' } });
       setText('');
-      await navigate(paths.read(created.id));
+      // On to the library, where the saved text now heads the list and can be opened to read.
+      await navigate(paths.library());
     } catch (cause) {
       setError(
         cause instanceof StorageFullError
@@ -70,13 +71,13 @@ export function AddText({ onGenerated }: { onGenerated: (text: NewDocument) => v
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    void readPasted();
+    void savePasted();
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
       event.preventDefault();
-      void readPasted();
+      void savePasted();
     }
   }
 
@@ -109,7 +110,7 @@ export function AddText({ onGenerated }: { onGenerated: (text: NewDocument) => v
           id="text-input"
           className={styles.textarea}
           rows={6}
-          placeholder="Paste the text you want to read…"
+          placeholder="Paste the text you want to save and read…"
           value={text}
           onChange={(event) => setText(event.target.value)}
           onKeyDown={handleKeyDown}
@@ -123,7 +124,7 @@ export function AddText({ onGenerated }: { onGenerated: (text: NewDocument) => v
         </p>
         <div className={styles.actions}>
           <Button variant="primary" type="submit" disabled={wordCount === 0}>
-            Read this text
+            Save This Text
           </Button>
           <input
             ref={fileInput}
@@ -161,7 +162,7 @@ export function AddText({ onGenerated }: { onGenerated: (text: NewDocument) => v
           <h2 className={styles.label}>Nothing to hand? Generate a practice text</h2>
           <p className={styles.hint}>
             Short reads on the topic you pick, put together in your browser. They are not added to
-            your library; press “Read this text” if you want to keep one.
+            your library; press “Save This Text” if you want to keep one.
           </p>
         </div>
         <div className={styles.generateFields}>

@@ -66,7 +66,9 @@ Reading:
 
 Getting text in:
 
-- Paste it, or open files: plain text, Markdown, saved web pages, EPUB and PDF.
+- Paste it and press “Save This Text”: it is saved and the library opens, ready
+  to read it from there. Or open files: plain text, Markdown, saved web pages,
+  EPUB and PDF.
   Choose them or drop them anywhere on the Read page, several at once if you like.
 - Web pages are reduced to the article (the same extraction as Firefox's Reader
   View). EPUBs are read in chapter order. PDFs have their lines rejoined into
