@@ -557,7 +557,13 @@ describe('library', () => {
 describe('games', () => {
   it('lists the games and opens one in a frame', async () => {
     const { user } = renderApp('/games');
-    expect(await screen.findByRole('link', { name: /Flying Mile/ })).toBeTruthy();
+    const flyingMile = await screen.findByRole('link', { name: /Flying Mile/ });
+    // Each game has a small preview picture before its name.
+    const preview = flyingMile.querySelector('img')!;
+    expect(preview.getAttribute('src')).toMatch(/games\/flying-mile\.jpg$/);
+    expect(preview.compareDocumentPosition(within(flyingMile).getByRole('heading'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
     await user.click(screen.getByRole('link', { name: /Keystorm/ }));
 
     const frame = (await screen.findByTitle('Keystorm')) as HTMLIFrameElement;

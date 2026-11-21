@@ -148,7 +148,8 @@ src/
     library/     Everything saved: search, sort, rename, remove.
     settings/    Reading settings, with a preview of their effect.
     games/       Typing games. Each is a self-contained page in public/games/,
-                 shown in a frame; add one by listing it in games.ts.
+                 shown in a frame, with a small preview picture beside its
+                 name; add one by listing it in games.ts.
     stereograms/ Hidden-word pictures against a timer, and adding your own.
   app/         Composition: feature registry, routes, shell, service wiring.
   styles/      Design tokens and base styles.

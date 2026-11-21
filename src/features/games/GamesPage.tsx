@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import { APP_NAME } from '@/lib/config';
 import { paths } from '@/lib/paths';
-import { GAMES } from './games';
+import { GAMES, previewUrl } from './games';
 import styles from './Games.module.css';
 
 export function GamesPage() {
@@ -16,7 +16,18 @@ export function GamesPage() {
         {GAMES.map((game) => (
           <li key={game.id}>
             <Link to={paths.games(game.id)} className={styles.card}>
-              <h2>{game.title}</h2>
+              <div className={styles.heading}>
+                {/* The name beside it says what this is, so the picture itself stays silent. */}
+                <img
+                  className={styles.preview}
+                  src={previewUrl(game)}
+                  alt=""
+                  width={480}
+                  height={270}
+                  loading="lazy"
+                />
+                <h2>{game.title}</h2>
+              </div>
               <p>{game.description}</p>
               <span className={styles.play}>Play</span>
             </Link>

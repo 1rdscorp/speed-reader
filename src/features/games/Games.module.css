@@ -43,6 +43,24 @@
   }
 }
 
+/* A small picture of the game, then its name. */
+.heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.preview {
+  flex: none;
+  width: 7.5rem;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #000000;
+  object-fit: cover;
+}
+
 .card h2 {
   font-family: var(--font-display);
   font-size: var(--text-xl);

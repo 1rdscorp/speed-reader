@@ -5,9 +5,11 @@ export interface Game {
   description: string;
   /** The game itself: a self-contained page in public/games/. */
   file: string;
+  /** A small picture of the game being played, also in public/games/. */
+  preview: string;
 }
 
-/** The games on the site. To add one, put its page in public/games/ and list it here. */
+/** The games on the site. To add one, put its page and a preview picture in public/games/ and list it here. */
 export const GAMES: Game[] = [
   {
     id: 'flying-mile',
@@ -15,6 +17,7 @@ export const GAMES: Game[] = [
     description:
       'Type the passage to drive a jet car down the salt flats. The faster and cleaner you type, the faster it goes.',
     file: 'flying-mile.html',
+    preview: 'flying-mile.jpg',
   },
   {
     id: 'keystorm',
@@ -22,8 +25,12 @@ export const GAMES: Game[] = [
     description:
       'Words fall with the rain. Type one and lightning strikes it down before it reaches the city.',
     file: 'keystorm.html',
+    preview: 'keystorm.jpg',
   },
 ];
 
 /** Address of a game's page, relative to wherever the site is hosted. */
 export const gameUrl = (game: Game) => `${import.meta.env.BASE_URL}games/${game.file}`;
+
+/** Address of a game's preview picture. */
+export const previewUrl = (game: Game) => `${import.meta.env.BASE_URL}games/${game.preview}`;
