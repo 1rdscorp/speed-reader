@@ -89,6 +89,7 @@ Stereograms:
   dots and forty-six textured ones. They are picture files in
   `public/stereograms/`, listed with their words in
   `src/features/stereograms/pictures.ts`.
+- The pictures come in a new, shuffled order on every visit.
 - Take as long as you like over each one; "Show image" reveals the hidden word.
 - The picture can fill the screen, with its buttons.
 - Add stereogram pictures of your own, with an optional answer. They follow the

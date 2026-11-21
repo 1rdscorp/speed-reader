@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { APP_NAME } from '@/lib/config';
 import { useServices } from '@/lib/services';
-import type { OwnStereogram } from '@/lib/stereograms';
+import { shuffledOrder, type OwnStereogram } from '@/lib/stereograms';
 import { useAsync } from '@/lib/useAsync';
 import { useFullscreen } from '@/lib/useFullscreen';
 import { Button, CollapseIcon, ExpandIcon, IconButton } from '@/ui';
@@ -18,6 +18,8 @@ export function StereogramsPage() {
   const own: OwnStereogram[] = saved.status === 'ready' ? saved.data : [];
   const total = BUILT_IN.length + own.length;
 
+  // The built-in pictures come in a new order on every visit; your own follow them.
+  const [order] = useState(() => shuffledOrder(BUILT_IN.length, Math.random));
   const [position, setPosition] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const viewerRef = useRef<HTMLElement>(null);
@@ -25,7 +27,9 @@ export function StereogramsPage() {
 
   // A picture that was removed while it was showing leaves the position past the end.
   const index = Math.min(position, total - 1);
-  const builtIn = BUILT_IN[index];
+  // Which built-in picture is at this place in the order.
+  const picture = order[index] ?? -1;
+  const builtIn = BUILT_IN[picture];
   const ownEntry = own[index - BUILT_IN.length];
 
   function show(next: number) {
@@ -55,7 +59,7 @@ export function StereogramsPage() {
           <span>
             Stereogram {index + 1} of {total}
             {ownEntry ? ` · ${ownEntry.name}` : ''}
-            {builtIn && <span> · {builtIn.kind ?? styleName(index)}</span>}
+            {builtIn && <span> · {builtIn.kind ?? styleName(picture)}</span>}
           </span>
           <IconButton
             label={fullscreen.active ? 'Exit full screen' : 'Full screen'}
@@ -75,7 +79,12 @@ export function StereogramsPage() {
             height={2160}
           />
         ) : builtIn ? (
-          <BuiltInPicture word={builtIn.word} index={index} revealed={revealed} />
+          <BuiltInPicture
+            word={builtIn.word}
+            index={picture}
+            number={index + 1}
+            revealed={revealed}
+          />
         ) : (
           ownEntry && <OwnPicture entry={ownEntry} />
         )}

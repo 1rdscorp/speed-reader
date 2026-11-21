@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createTestServices, renderApp } from '@/test/renderApp';
 
 async function seeded(...texts: Array<{ text: string; title?: string }>) {
@@ -585,6 +585,22 @@ describe('dead ends', () => {
 });
 
 describe('stereograms', () => {
+  // The pictures are shuffled on each visit. A draw that is always "the last" leaves the order as listed.
+  beforeEach(() => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.999999);
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('shows the pictures in a different order when the draws differ', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    renderApp('/stereograms');
+    // With every draw "the first", the picture listed second comes up first.
+    expect(await screen.findByText('Stereogram 1 of 60')).toBeTruthy();
+    expect(screen.getByText(/Marble/)).toBeTruthy();
+  });
+
   it('shows sixty pictures to step through, with no timer', async () => {
     const { user } = renderApp('/stereograms');
     expect(await screen.findByText('Stereogram 1 of 60')).toBeTruthy();

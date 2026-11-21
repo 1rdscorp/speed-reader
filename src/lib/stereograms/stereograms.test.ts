@@ -3,6 +3,7 @@ import { createMemoryStore } from '@/lib/storage';
 import { createStereogramRepository } from './repository';
 import { createNoise, fractal } from './noise';
 import { seededRandom, separation, stereogram } from './sirds';
+import { shuffledOrder } from './shuffle';
 import { HIDDEN_WORDS } from './words';
 
 describe('stereogram', () => {
@@ -130,5 +131,15 @@ describe('own stereograms', () => {
     await repository.remove(first.id);
     expect((await repository.list()).map((entry) => entry.id)).toEqual([second.id]);
     expect(await repository.image(first.id)).toBeUndefined();
+  });
+});
+
+describe('shuffled order', () => {
+  it('holds every number once, in an order that depends on the draws', () => {
+    const order = shuffledOrder(60, seededRandom(3));
+    expect([...order].sort((a, b) => a - b)).toEqual(Array.from({ length: 60 }, (_, i) => i));
+    expect(order).not.toEqual(Array.from({ length: 60 }, (_, i) => i));
+    expect(shuffledOrder(60, seededRandom(3))).toEqual(order);
+    expect(shuffledOrder(60, seededRandom(4))).not.toEqual(order);
   });
 });
