@@ -64,8 +64,8 @@ export function AddOwn({ own, onChanged, onView }: AddOwnProps) {
         Your stereograms
       </h2>
       <p className={styles.hint}>
-        Add stereogram pictures of your own. They are shown after the built-in ones, with the same
-        timer, and are saved only in this browser.
+        Add stereogram pictures of your own. They are shown after the built-in ones, and are saved
+        only in this browser.
       </p>
       <form className={styles.form} onSubmit={add}>
         <div className={styles.field}>

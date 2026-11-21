@@ -1,7 +1,7 @@
 import type { FeatureModule } from '@/lib/feature';
 import { paths } from '@/lib/paths';
 
-/** Stereograms: pictures with a hidden word, each shown against a timer. */
+/** Stereograms: pictures with a hidden word, and a button that reveals it. */
 export const stereogramsFeature: FeatureModule = {
   id: 'stereograms',
   nav: { label: 'Stereograms', to: paths.stereograms() },

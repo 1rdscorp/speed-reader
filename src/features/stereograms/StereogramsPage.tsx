@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { APP_NAME } from '@/lib/config';
 import { useServices } from '@/lib/services';
 import { HIDDEN_WORDS, type OwnStereogram } from '@/lib/stereograms';
@@ -11,9 +11,6 @@ import { OwnPicture } from './OwnPicture';
 import styles from './Stereograms.module.css';
 import { styleName } from './textures';
 
-/** How long each picture is shown before the answer is offered. */
-const SECONDS = 30;
-
 export function StereogramsPage() {
   const { stereograms } = useServices();
   const saved = useAsync(() => stereograms.list(), [stereograms]);
@@ -21,8 +18,6 @@ export function StereogramsPage() {
   const total = HIDDEN_WORDS.length + own.length;
 
   const [position, setPosition] = useState(0);
-  const [remaining, setRemaining] = useState(SECONDS);
-  const [paused, setPaused] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const viewerRef = useRef<HTMLElement>(null);
   const fullscreen = useFullscreen(viewerRef);
@@ -31,18 +26,9 @@ export function StereogramsPage() {
   const index = Math.min(position, total - 1);
   const word = HIDDEN_WORDS[index];
   const ownEntry = own[index - HIDDEN_WORDS.length];
-  const timeUp = remaining === 0;
-
-  useEffect(() => {
-    if (paused || timeUp) return;
-    const timer = setInterval(() => setRemaining((seconds) => Math.max(0, seconds - 1)), 1000);
-    return () => clearInterval(timer);
-  }, [paused, timeUp, index]);
 
   function show(next: number) {
     setPosition((next + total) % total);
-    setRemaining(SECONDS);
-    setPaused(false);
     setRevealed(false);
   }
 
@@ -70,23 +56,14 @@ export function StereogramsPage() {
             {ownEntry ? ` · ${ownEntry.name}` : ''}
             {word !== undefined && <span> · {styleName(index)}</span>}
           </span>
-          <span className={styles.metaEnd}>
-            <span className={styles.time} role="timer" aria-label="Time left">
-              0:{String(remaining).padStart(2, '0')}
-            </span>
-            <IconButton
-              label={fullscreen.active ? 'Exit full screen' : 'Full screen'}
-              aria-pressed={fullscreen.active}
-              onClick={fullscreen.toggle}
-            >
-              {fullscreen.active ? <CollapseIcon /> : <ExpandIcon />}
-            </IconButton>
-          </span>
+          <IconButton
+            label={fullscreen.active ? 'Exit full screen' : 'Full screen'}
+            aria-pressed={fullscreen.active}
+            onClick={fullscreen.toggle}
+          >
+            {fullscreen.active ? <CollapseIcon /> : <ExpandIcon />}
+          </IconButton>
         </div>
-        <div
-          className={styles.bar}
-          style={{ '--left': remaining / SECONDS } as React.CSSProperties}
-        />
 
         {word !== undefined ? (
           <BuiltInPicture word={word} index={index} revealed={revealed} />
@@ -106,15 +83,9 @@ export function StereogramsPage() {
 
         <div className={styles.actions}>
           <Button onClick={() => show(index - 1)}>Previous</Button>
-          {timeUp ? (
-            <Button variant="primary" onClick={() => setRevealed((shown) => !shown)}>
-              {revealed ? 'Hide image' : 'Show image'}
-            </Button>
-          ) : (
-            <Button variant="primary" onClick={() => setPaused((value) => !value)}>
-              {paused ? 'Resume' : 'Pause'}
-            </Button>
-          )}
+          <Button variant="primary" onClick={() => setRevealed((shown) => !shown)}>
+            {revealed ? 'Hide image' : 'Show image'}
+          </Button>
           <Button onClick={() => show(index + 1)}>Next</Button>
         </div>
       </section>

@@ -37,31 +37,6 @@
   font-size: var(--text-sm);
 }
 
-.time {
-  color: var(--ink);
-  font-size: var(--text-xl);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-/* The time left, as a bar that empties. */
-.bar {
-  height: 6px;
-  border-radius: var(--radius-full);
-  background: var(--line);
-  overflow: hidden;
-}
-
-.bar::before {
-  content: '';
-  display: block;
-  height: 100%;
-  width: calc(var(--left) * 100%);
-  border-radius: inherit;
-  background: var(--accent);
-  transition: width 1s linear;
-}
-
 .picture {
   display: block;
   width: 100%;
@@ -157,12 +132,6 @@
   overflow-wrap: anywhere;
 }
 
-.metaEnd {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
 /*
  * Full screen. The browser's own full screen sizes the viewer to the display;
  * where that is unavailable these rules stretch it over the window instead.
@@ -177,7 +146,7 @@
   overflow-y: auto;
 }
 
-/* The picture takes all the room the timer and buttons leave, keeping its shape. */
+/* The picture takes all the room the label and buttons leave, keeping its shape. */
 .viewer[data-fullscreen] .picture {
   flex: 1;
   min-height: 0;

@@ -85,9 +85,8 @@ Stereograms:
   contours, galaxy, bubbles, brush strokes and leaves), each in several colour
   sets. They are drawn in the browser from a seed (`src/lib/stereograms` and
   `src/features/stereograms/textures.ts`), so no image files are shipped.
-- Each is shown against a 30-second timer that can be paused; when the time is
-  up, "Show image" reveals the hidden word.
-- The picture can fill the screen, with its timer and buttons.
+- Take as long as you like over each one; "Show image" reveals the hidden word.
+- The picture can fill the screen, with its buttons.
 - Add stereogram pictures of your own, with an optional answer. They follow the
   built-in ones and are saved in the browser.
 
@@ -150,7 +149,7 @@ src/
     games/       Typing games. Each is a self-contained page in public/games/,
                  shown in a frame, with a small preview picture beside its
                  name; add one by listing it in games.ts.
-    stereograms/ Hidden-word pictures against a timer, and adding your own.
+    stereograms/ Hidden-word pictures, revealing the word, adding your own.
   app/         Composition: feature registry, routes, shell, service wiring.
   styles/      Design tokens and base styles.
   test/        Test setup and a helper that renders the whole app in memory.

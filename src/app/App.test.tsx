@@ -1,5 +1,5 @@
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { createTestServices, renderApp } from '@/test/renderApp';
 
 async function seeded(...texts: Array<{ text: string; title?: string }>) {
@@ -585,35 +585,15 @@ describe('dead ends', () => {
 });
 
 describe('stereograms', () => {
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-  function tick(seconds: number) {
-    // First let the page finish starting its timer, then move the clock.
-    act(() => {});
-    act(() => void vi.advanceTimersByTime(seconds * 1000));
-  }
-  const timeLeft = () => screen.getByRole('timer').textContent;
-
-  it('shows fifty pictures, each against a 30-second timer that can be paused', async () => {
-    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+  it('shows fifty pictures to step through, with no timer', async () => {
     const { user } = renderApp('/stereograms');
     expect(await screen.findByText('Stereogram 1 of 50')).toBeTruthy();
-    expect(timeLeft()).toBe('0:30');
+    expect(screen.queryByRole('timer')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Pause|Resume/ })).toBeNull();
 
-    tick(4);
-    expect(timeLeft()).toBe('0:26');
-    await user.click(screen.getByRole('button', { name: 'Pause' }));
-    tick(10);
-    expect(timeLeft()).toBe('0:26');
-    await user.click(screen.getByRole('button', { name: 'Resume' }));
-    tick(1);
-    expect(timeLeft()).toBe('0:25');
-
-    // The next picture starts its own 30 seconds; going back from the first reaches the last.
+    // Going back from the first reaches the last.
     await user.click(screen.getByRole('button', { name: 'Next' }));
     expect(screen.getByText('Stereogram 2 of 50')).toBeTruthy();
-    expect(timeLeft()).toBe('0:30');
     await user.click(screen.getByRole('button', { name: 'Previous' }));
     await user.click(screen.getByRole('button', { name: 'Previous' }));
     expect(screen.getByText('Stereogram 50 of 50')).toBeTruthy();
@@ -627,8 +607,8 @@ describe('stereograms', () => {
 
     await user.click(screen.getByRole('button', { name: 'Full screen' }));
     expect(viewer.hasAttribute('data-fullscreen')).toBe(true);
-    // The timer and the buttons come along.
-    expect(within(viewer).getByRole('button', { name: 'Pause' })).toBeTruthy();
+    // The buttons come along.
+    expect(within(viewer).getByRole('button', { name: 'Show image' })).toBeTruthy();
 
     await user.keyboard('{Escape}');
     expect(viewer.hasAttribute('data-fullscreen')).toBe(false);
@@ -637,25 +617,24 @@ describe('stereograms', () => {
     expect(viewer.hasAttribute('data-fullscreen')).toBe(false);
   });
 
-  it('offers to show the hidden word only when the time is up', async () => {
-    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+  it('shows the hidden word when asked, and hides it again for the next picture', async () => {
     const { user } = renderApp('/stereograms');
     await screen.findByText('Stereogram 1 of 50');
-    expect(screen.queryByRole('button', { name: 'Show image' })).toBeNull();
+    expect(screen.queryByText(/hidden word is/)).toBeNull();
 
-    tick(30);
-    expect(timeLeft()).toBe('0:00');
     await user.click(screen.getByRole('button', { name: 'Show image' }));
     expect(screen.getByText('The hidden word is READ.')).toBeTruthy();
     expect(screen.getByRole('img', { name: 'The hidden word: READ' })).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: 'Hide image' }));
+    expect(screen.queryByText(/hidden word is/)).toBeNull();
 
+    await user.click(screen.getByRole('button', { name: 'Show image' }));
     await user.click(screen.getByRole('button', { name: 'Next' }));
     expect(screen.queryByText(/hidden word is/)).toBeNull();
-    expect(screen.getByRole('button', { name: 'Pause' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Show image' })).toBeTruthy();
   });
 
   it('adds your own stereogram to the end, shows its answer, and removes it', async () => {
-    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
     const { user, services } = renderApp('/stereograms');
     await screen.findByText('Stereogram 1 of 50');
 
@@ -671,7 +650,6 @@ describe('stereograms', () => {
     expect(
       (await screen.findByRole('img', { name: 'Your stereogram: shark.png' })).getAttribute('src'),
     ).toMatch(/^data:image\/png;base64,/);
-    tick(30);
     await user.click(screen.getByRole('button', { name: 'Show image' }));
     expect(screen.getByText('Hidden in it: A shark')).toBeTruthy();
 
