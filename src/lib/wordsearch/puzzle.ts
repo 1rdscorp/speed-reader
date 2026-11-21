@@ -1,3 +1,4 @@
+import { shuffled } from '@/lib/random';
 import { THEMES, type Theme } from './words';
 
 export interface Cell {
@@ -93,15 +94,6 @@ export const UNWANTED = [
 UNWANTED.push('TIT', 'FAG', 'CUNT', 'SLUT', 'RAPE', 'NAZI', 'KILL', 'DEAD', 'ANUS', 'PORN');
 
 const EMPTY = '';
-
-function shuffled<T>(items: readonly T[], random: () => number): T[] {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(random() * (i + 1));
-    [result[i], result[j]] = [result[j]!, result[i]!];
-  }
-  return result;
-}
 
 const reversed = (word: string) => [...word].reverse().join('');
 

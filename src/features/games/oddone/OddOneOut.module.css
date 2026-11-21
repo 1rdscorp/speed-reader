@@ -1,0 +1,41 @@
+.words {
+  display: grid;
+  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 44rem;
+  margin-inline: auto;
+  container-type: inline-size;
+}
+
+.word {
+  min-width: 0;
+  padding: 0.9em 0.2em;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--ink);
+  /* Small enough for the longest word at this many columns, and never tiny. */
+  font-size: clamp(0.8rem, calc(100cqw / var(--columns) / 5.2), 1.375rem);
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.word[data-wrong] {
+  border-color: var(--danger);
+}
+
+@media (hover: hover) {
+  .word:hover {
+    border-color: var(--accent);
+  }
+}
+
+.waiting {
+  display: grid;
+  place-items: center;
+  min-height: 14rem;
+  border: 1px dashed var(--outline);
+  border-radius: var(--radius-sm);
+}

@@ -714,6 +714,155 @@ describe('games', () => {
     }
   });
 
+  it('lists every game, each with a preview', async () => {
+    renderApp('/games');
+    await screen.findByRole('link', { name: /Flying Mile/ });
+    const games = within(screen.getByRole('main')).getAllByRole('link');
+    expect(games.map((link) => within(link).getByRole('heading').textContent)).toEqual([
+      'Flying Mile',
+      'Keystorm',
+      'Word Search',
+      'Word Scramble',
+      'Schulte Table',
+      'Odd One Out',
+    ]);
+    for (const link of games) {
+      expect(link.querySelector('img')!.getAttribute('src')).toMatch(/games\/[a-z-]+\.jpg$/);
+    }
+  });
+
+  it('plays a Schulte table: the numbers in order, a miss, and the time at the end', async () => {
+    const { user } = renderApp('/games/schulte-table');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Schulte Table' })).toBeTruthy();
+    const table = within(await screen.findByRole('group', { name: 'Numbers 1 to 16' }));
+    expect(table.getAllByRole('button')).toHaveLength(16);
+    expect(screen.getByText('Find 1 to start the clock.')).toBeTruthy();
+
+    // A number out of turn is a miss.
+    await user.click(table.getByRole('button', { name: '7' }));
+    expect(screen.getByText('That is 7. You are looking for 1.')).toBeTruthy();
+    await user.click(table.getByRole('button', { name: '1' }));
+    expect(screen.getByText('Next: 2')).toBeTruthy();
+    expect(table.getByRole('button', { name: '1' }).hasAttribute('data-found')).toBe(true);
+    // One already found is just ignored.
+    await user.click(table.getByRole('button', { name: '1' }));
+    expect(screen.getByText('Next: 2')).toBeTruthy();
+
+    for (let number = 2; number <= 16; number += 1) {
+      await user.click(table.getByRole('button', { name: String(number) }));
+    }
+    expect(screen.getByText(/^All 16 found in [\d.:]+( s)?, with 1 miss\.$/)).toBeTruthy();
+    expect(screen.getByText('Best').nextElementSibling!.textContent).not.toBe('–');
+
+    // The other sizes, and a fresh table.
+    await user.click(screen.getByRole('button', { name: '5 × 5' }));
+    expect(
+      within(screen.getByRole('group', { name: 'Numbers 1 to 25' })).getAllByRole('button'),
+    ).toHaveLength(25);
+    await user.click(screen.getByRole('button', { name: '3 × 3' }));
+    const small = within(screen.getByRole('group', { name: 'Numbers 1 to 9' }));
+    for (let number = 1; number <= 9; number += 1) {
+      await user.click(small.getByRole('button', { name: String(number) }));
+    }
+    expect(screen.getByText(/^All 9 found in [\d.:]+( s)?\.$/)).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: 'New table' }));
+    expect(screen.getByText('Find 1 to start the clock.')).toBeTruthy();
+  });
+
+  it('plays word scramble: a wrong guess, a hint, a right answer, a skip, and the end', async () => {
+    const { THEMES } = await import('@/lib/wordsearch');
+    const { user } = renderApp('/games/word-scramble');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Word Scramble' })).toBeTruthy();
+    const input = await screen.findByLabelText('Your answer');
+    const stat = (label: string) => screen.getByText(label).nextElementSibling!.textContent;
+
+    /** The word on show, worked out from its theme and its letters. */
+    function answer() {
+      const theme = screen
+        .getByText('Theme:', { exact: false })
+        .querySelector('strong')!.textContent;
+      const letters = screen
+        .getByLabelText(/^Scrambled letters/)
+        .textContent.split('')
+        .sort()
+        .join('');
+      const words = THEMES.find((candidate) => candidate.name === theme)!.words;
+      return { letters, word: words.find((word) => [...word].sort().join('') === letters)! };
+    }
+
+    const first = answer();
+    expect(screen.getByLabelText(/^Scrambled letters/).textContent).not.toBe(first.word);
+    expect(stat('Word')).toBe('1 of 10');
+    expect(screen.getByRole('button', { name: 'Check' })).toHaveProperty('disabled', true);
+
+    await user.type(input, 'qqq{Enter}');
+    expect(screen.getByText('Not QQQ. Try again.')).toBeTruthy();
+    expect(stat('Word')).toBe('1 of 10');
+
+    // Shuffling keeps the same letters.
+    await user.click(screen.getByRole('button', { name: 'Shuffle' }));
+    expect(answer().letters).toBe(first.letters);
+
+    await user.click(screen.getByRole('button', { name: 'Hint' }));
+    expect(screen.getByText(`It starts with ${first.word[0]}.`)).toBeTruthy();
+
+    await user.clear(input);
+    await user.type(input, `${first.word.toLowerCase()}{Enter}`);
+    expect(screen.getByText(`Yes, ${first.word}: 10 points.`)).toBeTruthy();
+    expect(stat('Score')).toBe('10');
+    expect(stat('Solved')).toBe('1');
+    expect(stat('Word')).toBe('2 of 10');
+    expect(input).toHaveProperty('value', '');
+
+    const second = answer().word;
+    await user.click(screen.getByRole('button', { name: 'Skip' }));
+    expect(screen.getByText(`It was ${second}.`)).toBeTruthy();
+    expect(stat('Solved')).toBe('1');
+
+    for (let i = 0; i < 8; i += 1) await user.type(input, `${answer().word}{Enter}`);
+    expect(screen.getByText(/You unscrambled 9 of 10\. Final score: 90\.$/)).toBeTruthy();
+    expect(screen.queryByLabelText('Your answer')).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'New game' }));
+    expect(stat('Score')).toBe('0');
+    await user.click(screen.getByRole('button', { name: 'Hard' }));
+    expect(answer().word.length).toBeGreaterThanOrEqual(7);
+  });
+
+  it('plays odd one out: start, a miss, and ten finds', async () => {
+    const { user } = renderApp('/games/odd-one-out');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Odd One Out' })).toBeTruthy();
+    // Nothing to look at, and no clock, until Start.
+    expect(screen.queryByRole('group', { name: /Words/ })).toBeNull();
+    await user.click(await screen.findByRole('button', { name: 'Start' }));
+
+    const words = () => within(screen.getByRole('group', { name: /Words/ })).getAllByRole('button');
+    const odd = () => {
+      const all = words();
+      return all.find(
+        (word) => all.filter((other) => other.textContent === word.textContent).length === 1,
+      )!;
+    };
+    expect(words()).toHaveLength(12);
+
+    const same = words().find((word) => word !== odd())!;
+    await user.click(same);
+    expect(screen.getByText('Not that one: it is the same as the rest.')).toBeTruthy();
+    expect(screen.getByText('Misses').nextElementSibling!.textContent).toBe('1');
+
+    await user.click(odd());
+    expect(screen.getByText('1 of 10')).toBeTruthy();
+    expect(screen.getByText(/^Yes: “[a-z]+” among “[a-z]+”\.$/)).toBeTruthy();
+    for (let i = 0; i < 9; i += 1) await user.click(odd());
+    expect(screen.getByText(/^All 10 found in [\d.:]+( s)?, with 1 miss\.$/)).toBeTruthy();
+    expect(screen.queryByRole('group', { name: /Words/ })).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Hard' }));
+    await user.click(screen.getByRole('button', { name: 'Start' }));
+    expect(words()).toHaveLength(30);
+    expect(screen.getByText('0 of 10')).toBeTruthy();
+  });
+
   it('says so when a game does not exist', async () => {
     renderApp('/games/nope');
     expect(await screen.findByRole('heading', { name: /no game at this address/ })).toBeTruthy();

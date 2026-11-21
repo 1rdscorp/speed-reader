@@ -50,6 +50,30 @@ export const GAMES: Game[] = [
     preview: 'word-search.jpg',
     Play: lazy(async () => ({ default: (await import('./wordsearch/WordSearch')).WordSearch })),
   },
+  {
+    id: 'word-scramble',
+    title: 'Word Scramble',
+    description:
+      'The letters of a word, out of order, with its theme as a clue. Put ten of them right.',
+    preview: 'word-scramble.jpg',
+    Play: lazy(async () => ({ default: (await import('./scramble/WordScramble')).WordScramble })),
+  },
+  {
+    id: 'schulte-table',
+    title: 'Schulte Table',
+    description:
+      'Find the numbers in order as fast as you can. A classic exercise for taking in more of the page at a glance.',
+    preview: 'schulte-table.jpg',
+    Play: lazy(async () => ({ default: (await import('./schulte/SchulteTable')).SchulteTable })),
+  },
+  {
+    id: 'odd-one-out',
+    title: 'Odd One Out',
+    description:
+      'A screen of the same word, and one that differs by a single lookalike letter. Spot it, ten times, against the clock.',
+    preview: 'odd-one-out.jpg',
+    Play: lazy(async () => ({ default: (await import('./oddone/OddOneOut')).OddOneOut })),
+  },
 ];
 
 /** Address of a game's page, relative to wherever the site is hosted. */

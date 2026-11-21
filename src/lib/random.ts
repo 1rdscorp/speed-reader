@@ -1,0 +1,14 @@
+/** A copy of the items in a random order (Fisher–Yates), using `random` for the draws. */
+export function shuffled<T>(items: readonly T[], random: () => number = Math.random): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j]!, result[i]!];
+  }
+  return result;
+}
+
+/** One of the items, chosen at random. */
+export function pick<T>(items: readonly T[], random: () => number = Math.random): T {
+  return items[Math.floor(random() * items.length)]!;
+}

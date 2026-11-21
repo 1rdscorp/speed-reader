@@ -1,0 +1,57 @@
+.play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.clue {
+  color: var(--ink-soft);
+  font-size: var(--text-lg);
+}
+
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.tile {
+  display: grid;
+  place-items: center;
+  width: clamp(2.5rem, 10vw, 3.5rem);
+  aspect-ratio: 1;
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  font-size: clamp(1.25rem, 5vw, 1.75rem);
+  font-weight: 700;
+}
+
+.guess {
+  width: min(100%, 20rem);
+  min-height: 3.25rem;
+  padding: 0 var(--space-4);
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.guess::placeholder {
+  color: var(--ink-muted);
+  font-size: var(--text-md);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.guess:focus-visible {
+  border-color: var(--accent);
+  outline-offset: 0;
+}

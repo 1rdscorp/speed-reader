@@ -1,0 +1,46 @@
+.table {
+  display: grid;
+  grid-template-columns: repeat(var(--side), 1fr);
+  gap: 6px;
+  width: 100%;
+  max-width: 30rem;
+  margin-inline: auto;
+  aspect-ratio: 1;
+  container-type: inline-size;
+  user-select: none;
+}
+
+.number {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 0;
+  border: 1.5px solid var(--outline);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: calc(100cqw / var(--side) * 0.42);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 120ms var(--ease);
+}
+
+/* A number already found steps back, so the eye is not drawn to it again. */
+.number[data-found] {
+  border-color: var(--line);
+  color: var(--ink-muted);
+  opacity: 0.45;
+}
+
+.number[data-wrong] {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+@media (hover: hover) {
+  .number:hover:not([data-found]) {
+    border-color: var(--accent);
+  }
+}

@@ -100,10 +100,16 @@ Stereograms:
 Games:
 
 - Two typing games, each its own page shown inside the site.
-- Word Search, built into the site: words from one of 24 themes hidden in a square of
-  letters, across, down and along the diagonals. Drag across a word, or click
-  its first and last letters. Three levels, a clock, a score, hints, and a new
-  puzzle every game (`src/lib/wordsearch` makes them).
+- Four games built into the site, in its own look:
+  - Word Search: words from one of 24 themes hidden in a square of letters,
+    across, down and along the diagonals. Drag across a word, or click its
+    first and last letters. Three levels, a clock, a score and hints.
+  - Word Scramble: put a word's letters back in order, with its theme as a
+    clue. Ten words a game, with shuffle, hints and skip.
+  - Schulte Table: find the numbers in order as fast as you can, on a 3, 4 or
+    5 square. A classic exercise for widening what the eyes take in.
+  - Odd One Out: a screen of one word, and one copy with a single lookalike
+    letter changed. Spot it ten times against the clock.
 
 Keeping it:
 
@@ -153,6 +159,8 @@ src/
                  that assembles them by topic and length.
     wordsearch/  Word search puzzles: themed word lists, and the maker that
                  hides each word exactly once in a square of letters.
+    scramble/    Word Scramble: rounds of scrambled words, and checking answers.
+    oddone/      Odd One Out: a word repeated, and its lookalike.
     stereograms/ The stereogram generator (any texture, bent over a depth
                  map), smooth noise, the hidden words, and storage for
                  pictures the person adds.
@@ -166,7 +174,8 @@ src/
     games/       Games, listed in games.ts with a small preview picture each.
                  A game is either a self-contained page in public/games/,
                  shown in a frame, or a component built into the site
-                 (wordsearch/).
+                 (wordsearch/, scramble/, schulte/, oddone/; they share
+                 TopBar and kit).
     stereograms/ Hidden-word pictures, revealing the word, adding your own.
   app/         Composition: feature registry, routes, shell, service wiring.
   styles/      Design tokens and base styles.
