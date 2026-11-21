@@ -99,9 +99,9 @@ describe('noise', () => {
 });
 
 describe('hidden words', () => {
-  it('are fifty different short words', () => {
-    expect(HIDDEN_WORDS).toHaveLength(50);
-    expect(new Set(HIDDEN_WORDS).size).toBe(50);
+  it('are ten different short words', () => {
+    expect(HIDDEN_WORDS).toHaveLength(10);
+    expect(new Set(HIDDEN_WORDS).size).toBe(10);
     for (const word of HIDDEN_WORDS) expect(word).toMatch(/^[A-Z]{3,6}$/);
   });
 });

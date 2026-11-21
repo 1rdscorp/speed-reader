@@ -356,9 +356,9 @@ export const styleName = (index: number) => STYLES[index % STYLES.length]!.name;
 
 /**
  * Draw the strip of texture for picture number `index`, `width` by `height`
- * pixels, and return its pixels. Styles take turns, and each time a style
- * comes round it has a different palette. Returns nothing where the browser
- * cannot draw.
+ * pixels, and return its pixels. Styles take turns, each with its own palette;
+ * if there are more pictures than styles, a style gets a different palette
+ * each time it comes round. Returns nothing where the browser cannot draw.
  */
 export function drawTexture(index: number, width: number, height: number): Uint32Array | undefined {
   const canvas = document.createElement('canvas');

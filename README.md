@@ -80,10 +80,10 @@ Getting text in:
 
 Stereograms:
 
-- Fifty built-in stereograms, each hiding a word, drawn at 4K UHD (3840 × 2160).
-  They come in ten styles (confetti, marble, mosaic, facets, camouflage,
-  contours, galaxy, bubbles, brush strokes and leaves), each in several colour
-  sets. They are drawn in the browser from a seed (`src/lib/stereograms` and
+- Ten built-in stereograms, each hiding a word, drawn at 4K UHD (3840 × 2160).
+  Each is in a different style (confetti, marble, mosaic, facets, camouflage,
+  contours, galaxy, bubbles, brush strokes and leaves) and colour set. They
+  are drawn in the browser from a seed (`src/lib/stereograms` and
   `src/features/stereograms/textures.ts`), so no image files are shipped.
 - Take as long as you like over each one; "Show image" reveals the hidden word.
 - The picture can fill the screen, with its buttons.

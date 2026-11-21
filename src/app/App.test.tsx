@@ -585,23 +585,23 @@ describe('dead ends', () => {
 });
 
 describe('stereograms', () => {
-  it('shows fifty pictures to step through, with no timer', async () => {
+  it('shows ten pictures to step through, with no timer', async () => {
     const { user } = renderApp('/stereograms');
-    expect(await screen.findByText('Stereogram 1 of 50')).toBeTruthy();
+    expect(await screen.findByText('Stereogram 1 of 10')).toBeTruthy();
     expect(screen.queryByRole('timer')).toBeNull();
     expect(screen.queryByRole('button', { name: /Pause|Resume/ })).toBeNull();
 
     // Going back from the first reaches the last.
     await user.click(screen.getByRole('button', { name: 'Next' }));
-    expect(screen.getByText('Stereogram 2 of 50')).toBeTruthy();
+    expect(screen.getByText('Stereogram 2 of 10')).toBeTruthy();
     await user.click(screen.getByRole('button', { name: 'Previous' }));
     await user.click(screen.getByRole('button', { name: 'Previous' }));
-    expect(screen.getByText('Stereogram 50 of 50')).toBeTruthy();
+    expect(screen.getByText('Stereogram 10 of 10')).toBeTruthy();
   });
 
   it('can fill the screen, and comes back with Escape', async () => {
     const { user } = renderApp('/stereograms');
-    await screen.findByText('Stereogram 1 of 50');
+    await screen.findByText('Stereogram 1 of 10');
     const viewer = screen.getByRole('region', { name: 'Stereogram' });
     expect(viewer.hasAttribute('data-fullscreen')).toBe(false);
 
@@ -619,7 +619,7 @@ describe('stereograms', () => {
 
   it('shows the hidden word when asked, and hides it again for the next picture', async () => {
     const { user } = renderApp('/stereograms');
-    await screen.findByText('Stereogram 1 of 50');
+    await screen.findByText('Stereogram 1 of 10');
     expect(screen.queryByText(/hidden word is/)).toBeNull();
 
     await user.click(screen.getByRole('button', { name: 'Show image' }));
@@ -636,17 +636,17 @@ describe('stereograms', () => {
 
   it('adds your own stereogram to the end, shows its answer, and removes it', async () => {
     const { user, services } = renderApp('/stereograms');
-    await screen.findByText('Stereogram 1 of 50');
+    await screen.findByText('Stereogram 1 of 10');
 
     const picture = new File([new Uint8Array([1, 2, 3])], 'shark.png', { type: 'image/png' });
     await user.upload(screen.getByLabelText('Picture'), picture);
     await user.type(screen.getByLabelText(/What is hidden/), 'A shark');
     await user.click(screen.getByRole('button', { name: 'Add stereogram' }));
-    expect(await screen.findByText('Stereogram 1 of 51')).toBeTruthy();
+    expect(await screen.findByText('Stereogram 1 of 11')).toBeTruthy();
     expect(await services.stereograms.list()).toMatchObject([{ name: 'shark.png' }]);
 
     await user.click(screen.getByRole('button', { name: 'View shark.png' }));
-    expect(screen.getByText('Stereogram 51 of 51 · shark.png')).toBeTruthy();
+    expect(screen.getByText('Stereogram 11 of 11 · shark.png')).toBeTruthy();
     expect(
       (await screen.findByRole('img', { name: 'Your stereogram: shark.png' })).getAttribute('src'),
     ).toMatch(/^data:image\/png;base64,/);
@@ -654,13 +654,13 @@ describe('stereograms', () => {
     expect(screen.getByText('Hidden in it: A shark')).toBeTruthy();
 
     await user.click(screen.getByRole('button', { name: 'Remove shark.png' }));
-    expect(await screen.findByText('Stereogram 50 of 50')).toBeTruthy();
+    expect(await screen.findByText('Stereogram 10 of 10')).toBeTruthy();
     expect(await services.stereograms.list()).toEqual([]);
   });
 
   it('refuses a file that is not a picture', async () => {
     const { user, services } = renderApp('/stereograms');
-    await screen.findByText('Stereogram 1 of 50');
+    await screen.findByText('Stereogram 1 of 10');
     const notes = new File(['hello'], 'notes.txt', { type: 'text/plain' });
     fireEvent.change(screen.getByLabelText('Picture'), { target: { files: [notes] } });
     await user.click(screen.getByRole('button', { name: 'Add stereogram' }));
