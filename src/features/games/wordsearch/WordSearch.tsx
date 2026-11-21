@@ -78,7 +78,8 @@ export function WordSearch() {
 
   function start(next: Difficulty) {
     setDifficulty(next);
-    setPuzzle(generatePuzzle(next));
+    // A new puzzle always has a different theme from the one before.
+    setPuzzle(generatePuzzle(next, Math.random, puzzle.theme));
     setFound([]);
     setAnchor(null);
     setDrag(null);

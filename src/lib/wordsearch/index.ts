@@ -3,6 +3,7 @@ export {
   LEVELS,
   lineTowards,
   occurrences,
+  UNWANTED,
   wordAlong,
   type Cell,
   type Difficulty,

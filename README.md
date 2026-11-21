@@ -98,7 +98,7 @@ Stereograms:
 Games:
 
 - Two typing games, each its own page shown inside the site.
-- Word Search, built into the site: words from a theme hidden in a square of
+- Word Search, built into the site: words from one of 24 themes hidden in a square of
   letters, across, down and along the diagonals. Drag across a word, or click
   its first and last letters. Three levels, a clock, a score, hints, and a new
   puzzle every game (`src/lib/wordsearch` makes them).

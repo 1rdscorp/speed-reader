@@ -5,6 +5,7 @@ import {
   LEVELS,
   lineTowards,
   occurrences,
+  UNWANTED,
   wordAlong,
   type Difficulty,
 } from './puzzle';
@@ -18,6 +19,22 @@ describe('word lists', () => {
       expect(new Set(words).size, name).toBe(words.length);
       expect(words.length, name).toBeGreaterThanOrEqual(LEVELS.hard.words + 6);
       for (const word of words) expect(word, name).toMatch(/^[A-Z]{3,8}$/);
+    }
+  });
+
+  it('cover two dozen themes, each named once', () => {
+    expect(THEMES).toHaveLength(24);
+    expect(new Set(THEMES.map((theme) => theme.name)).size).toBe(24);
+  });
+
+  it('hold no word with an unwanted word inside it, which could never be placed', () => {
+    for (const { words } of THEMES) {
+      for (const word of words) {
+        const backwards = [...word].reverse().join('');
+        for (const unwanted of UNWANTED) {
+          expect(word.includes(unwanted) || backwards.includes(unwanted), word).toBe(false);
+        }
+      }
     }
   });
 });
@@ -49,6 +66,21 @@ describe('generatePuzzle', () => {
         // and it cannot be found anywhere else.
         expect(occurrences(puzzle.grid, word)).toBe(1);
       }
+    }
+  });
+
+  it('can make a puzzle from every theme', () => {
+    const seen = new Set<string>();
+    for (let seed = 1; seed <= 400 && seen.size < THEMES.length; seed += 1) {
+      seen.add(generatePuzzle('hard', seededRandom(seed)).theme);
+    }
+    expect([...seen].sort()).toEqual(THEMES.map((theme) => theme.name).sort());
+  });
+
+  it('takes a different theme from the puzzle before when told what that was', () => {
+    for (let seed = 1; seed <= 30; seed += 1) {
+      const first = generatePuzzle('easy', seededRandom(seed));
+      expect(generatePuzzle('easy', seededRandom(seed), first.theme).theme).not.toBe(first.theme);
     }
   });
 

@@ -78,8 +78,19 @@ export const LEVELS: Record<Difficulty, Level> = {
 };
 
 /** Short words nobody wants to find by accident among the filler letters. */
-const UNWANTED = ['ASS', 'SEX', 'FUCK', 'SHIT', 'DAMN', 'HELL', 'CRAP', 'PISS', 'DICK', 'COCK'];
-const UNWANTED_TOO = ['TIT', 'FAG', 'CUNT', 'SLUT', 'RAPE', 'NAZI', 'KILL', 'DEAD', 'ANUS', 'PORN'];
+export const UNWANTED = [
+  'ASS',
+  'SEX',
+  'FUCK',
+  'SHIT',
+  'DAMN',
+  'HELL',
+  'CRAP',
+  'PISS',
+  'DICK',
+  'COCK',
+];
+UNWANTED.push('TIT', 'FAG', 'CUNT', 'SLUT', 'RAPE', 'NAZI', 'KILL', 'DEAD', 'ANUS', 'PORN');
 
 const EMPTY = '';
 
@@ -195,12 +206,18 @@ function choose(theme: Theme, count: number, size: number, random: () => number)
 /**
  * Make a puzzle: words from one theme hidden in a square of letters, each
  * findable in exactly one place. `random` decides everything, so the same
- * sequence of numbers always makes the same puzzle.
+ * sequence of numbers always makes the same puzzle. Name the theme of the
+ * puzzle before and the new one takes a different theme.
  */
-export function generatePuzzle(difficulty: Difficulty, random: () => number = Math.random): Puzzle {
+export function generatePuzzle(
+  difficulty: Difficulty,
+  random: () => number = Math.random,
+  previousTheme?: string,
+): Puzzle {
   const level = LEVELS[difficulty];
+  const themes = THEMES.filter((theme) => theme.name !== previousTheme);
   for (;;) {
-    const theme = THEMES[Math.floor(random() * THEMES.length)]!;
+    const theme = themes[Math.floor(random() * themes.length)]!;
     const words = choose(theme, level.words, level.size, random);
     // Longest first: long words are the hardest to fit, short ones slot in around them.
     const placements = place(
@@ -218,7 +235,7 @@ export function generatePuzzle(difficulty: Difficulty, random: () => number = Ma
       );
       const clean =
         words.every((word) => occurrences(grid, word) === 1) &&
-        [...UNWANTED, ...UNWANTED_TOO].every((word) => occurrences(grid, word) === 0);
+        UNWANTED.every((word) => occurrences(grid, word) === 0);
       if (clean) {
         // Listed in a shuffled order, so the list does not hint at where the long words are.
         return {
